@@ -1,0 +1,1189 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Админка - NoMercy</title>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <nav>
+  <a href="/" class="brand">NoMercy</a>
+        <div class="nav-buttons">
+            <% if (user) { %>
+                <a href="/messenger" class="nav-messenger-btn" title="Мессенджер">💬</a>
+                <div class="dropdown">
+        <button class="dropdown-toggle">
+          <span>Меню</span>
+        </button>
+        <div class="dropdown-menu">
+          <a href="/profile/<%= user.id %>" class="dropdown-item">👤 Профиль</a>
+          <a href="/market" class="dropdown-item">🛒 Маркет</a>
+          <a href="/cards" class="dropdown-item">🃏 Коллекция</a>
+          <a href="/news" class="dropdown-item">📰 Новости</a>
+          <a href="/quests" class="dropdown-item">📋 Квесты</a>
+          <a href="/games" class="dropdown-item">🎰 Мини-Игры</a>
+          <a href="/achievements" class="dropdown-item">🏆 Достижения</a>
+          <a href="/faq" class="dropdown-item">❓ FAQ</a>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item theme-toggle" id="theme-toggle">🌙 Светлая тема</button>
+          <div class="dropdown-divider"></div>
+          <a href="/logout" class="dropdown-item">🚪 Выйти</a>
+        </div>
+      </div>
+    <% } else { %>
+      <a href="/auth/discord" class="btn">Войти через Discord</a>
+    <% } %>
+  </div>
+</nav>
+
+<div class="container">
+  <h2>Панель администратора</h2>
+  
+  <!-- Success/Error Messages -->
+  <% if (typeof message !== 'undefined' && message) { %>
+    <div class="admin-message success">
+      <span class="message-icon">✅</span>
+      <span><%= message %></span>
+    </div>
+  <% } %>
+  
+  <!-- Admin Navigation Tabs -->
+  <div class="admin-tabs">
+    <button class="tab-btn active" onclick="showTab('overview')">Обзор</button>
+    <button class="tab-btn" onclick="showTab('transactions')">Транзакции</button>
+    <button class="tab-btn" onclick="showTab('pending')">Ожидают подтверждения</button>
+    <button class="tab-btn" onclick="showTab('listings')">Управление лотами</button>
+    <button class="tab-btn" onclick="showTab('items')">Товары</button>
+    <button class="tab-btn" onclick="showTab('cards')">Карточки</button>
+    <button class="tab-btn" onclick="showTab('collections')">Коллекции</button>
+    <button class="tab-btn" onclick="showTab('users')">Пользователи</button>
+    <button class="tab-btn" onclick="showTab('support')">Поддержка</button>
+  </div>
+
+  <!-- Overview Tab -->
+  <div id="overview-tab" class="tab-content active">
+    <h3>Обзор системы</h3>
+    
+    <!-- Admin Coin Management -->
+    <div class="card">
+      <div class="card-header">
+        <h3>💰 Управление монетами</h3>
+      </div>
+      <div class="card-content">
+        <form id="give-coins-form" class="admin-form">
+          <div class="form-group">
+            <label>Количество NMCoin для выдачи</label>
+            <input type="number" id="coin-amount" name="amount" min="1" max="10000" required class="form-input">
+          </div>
+          <div class="form-group">
+            <label>ID пользователя (оставьте пустым для себя)</label>
+            <input type="text" id="user-id" name="userId" placeholder="613717721867354122" class="form-input">
+          </div>
+          <button type="submit" class="btn">
+            <span class="btn-icon">💰</span>
+            Выдать монеты
+          </button>
+        </form>
+        
+        <div class="admin-actions" style="margin-top: 16px;">
+          <a href="/admin/reset-coins" class="btn danger" onclick="return confirm('Вы уверены, что хотите обнулить все монеты?')">
+            <span class="btn-icon">⚠️</span>
+            Обнулить все монеты
+          </a>
+          <a href="/admin/clear-listings" class="btn danger" onclick="return confirm('Вы уверены, что хотите очистить все лоты?')" style="margin-left: 8px;">
+            <span class="btn-icon">🗑️</span>
+            Очистить все лоты
+          </a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="grid">
+    <div class="card">
+      <h3>Товары</h3>
+      <form action="/admin/add" method="POST" class="card">
+        <input name="name" placeholder="Название" required>
+        <input name="price" placeholder="Цена" required>
+        <button class="btn" type="submit">Добавить товар</button>
+      </form>
+      <div style="margin-top:12px;">
+        <% items.forEach((item, index) => { %>
+          <div class="shop-item card">
+            <h4><%= item.name %></h4>
+            <p class="small">Цена: <%= item.price %></p>
+            <form action="/admin/delete" method="POST" style="display:inline">
+              <input type="hidden" name="index" value="<%= index %>">
+              <button class="btn ghost" type="submit">Удалить</button>
+            </form>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Карточки</h3>
+      <form action="/admin/cards/add" method="POST" class="card">
+        <input name="id" placeholder="ID карточки (например c10)" required>
+        <input name="name" placeholder="Название карточки" required>
+        <select name="rarity">
+          <option value="common">common</option>
+          <option value="rare">rare</option>
+          <option value="legendary">legendary</option>
+        </select>
+        <select name="collection" required>
+          <option value="">Выберите коллекцию</option>
+          <option value="launch_2025">Запуск 2025</option>
+          <option value="special_edition">Специальное издание</option>
+          <option value="limited_series">Ограниченная серия</option>
+        </select>
+        <input name="image" placeholder="URL изображения (опционально)">
+        <button class="btn" type="submit">Добавить карточку</button>
+      </form>
+      <div style="margin-top:12px;">
+        <% cards.forEach(c => { %>
+          <div class="card-item card">
+            <h4><%= c.name %> <span class="small">(<%= c.rarity %>)</span></h4>
+            <form action="/admin/cards/delete" method="POST">
+              <input type="hidden" name="id" value="<%= c.id %>">
+              <button class="btn ghost" type="submit">Удалить</button>
+            </form>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Паки</h3>
+      <form action="/admin/packs/add" method="POST" class="card">
+        <input name="id" placeholder="ID пака (p1)" required>
+        <input name="name" placeholder="Название пака" required>
+        <input name="price" placeholder="Цена пака" required>
+        <input name="count" placeholder="Кол-во карт в паках" required>
+        <button class="btn" type="submit">Создать пак</button>
+      </form>
+      <div style="margin-top:12px;">
+        <% packs.forEach(p => { %>
+          <div class="card card-item">
+            <h4><%= p.name %> <span class="small">Цена: <%= p.price %> / Кол-во: <%= p.count %></span></h4>
+            <form action="/admin/packs/delete" method="POST" style="display:inline">
+              <input type="hidden" name="id" value="<%= p.id %>">
+              <button class="btn ghost" type="submit">Удалить пак</button>
+            </form>
+            <form action="/admin/packs/addcard" method="POST" style="margin-top:8px;">
+              <input type="hidden" name="packId" value="<%= p.id %>">
+              <select name="cardId">
+                <% cards.forEach(c=>{ %>
+                  <option value="<%= c.id %>"><%= c.name %> (<%= c.rarity %>)</option>
+                <% }) %>
+              </select>
+              <input name="weight" placeholder="Вес (напр. 10)" required>
+              <button class="btn" type="submit">Добавить в пак</button>
+            </form>
+            <div class="small" style="margin-top:8px;">Содержимое:
+              <% p.contents.forEach(ct => { %>
+                <% const cd = cards.find(x=>x.id==ct.cardId) || {name:ct.cardId}; %>
+                <div class="small card-item" style="display:inline-block;margin:6px;padding:6px;"><%= cd.name %> (w:<%= ct.weight %>)</div>
+              <% }) %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transactions Tab -->
+  <div id="transactions-tab" class="tab-content">
+    <h3>Управление транзакциями</h3>
+    <div class="transactions-list">
+      <% if (transactions && transactions.length) { %>
+        <% transactions.forEach(function(transaction){ %>
+          <div class="transaction-card">
+            <div class="transaction-header">
+              <div class="transaction-id">ID: <%= transaction.id %></div>
+              <div class="transaction-status status-<%= transaction.status %>">
+                <%= transaction.status === 'pending_guarantor' ? '⏳ Ожидает проверки' : 
+                    transaction.status === 'approved' ? '✅ Одобрена' : 
+                    transaction.status === 'rejected' ? '❌ Отклонена' : transaction.status %>
+              </div>
+            </div>
+            
+            <div class="transaction-details">
+              <div class="transaction-info">
+                <div class="info-item">
+                  <span class="label">Покупатель:</span>
+                  <span class="value"><%= transaction.buyerId %></span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Продавец:</span>
+                  <span class="value"><%= transaction.sellerId %></span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Сумма:</span>
+                  <span class="value neon-num"><%= transaction.amount %> NMCoin</span>
+                </div>
+                <div class="info-item">
+                  <span class="label">Создана:</span>
+                  <span class="value"><%= new Date(transaction.createdAt).toLocaleString('ru-RU') %></span>
+                </div>
+              </div>
+              
+              <% if (transaction.status === 'pending_guarantor') { %>
+                <div class="transaction-actions">
+                  <form method="POST" action="/admin/transaction/<%= transaction.id %>/approve" style="display: inline;">
+                    <button type="submit" class="btn success">
+                      <span class="btn-icon">✅</span>
+                      Одобрить
+                    </button>
+                  </form>
+                  <form method="POST" action="/admin/transaction/<%= transaction.id %>/reject" style="display: inline;">
+                    <button type="submit" class="btn danger">
+                      <span class="btn-icon">❌</span>
+                      Отклонить
+                    </button>
+                  </form>
+                </div>
+              <% } else if (transaction.guarantorId) { %>
+                <div class="transaction-guarantor">
+                  <span class="label">Гарант:</span>
+                  <span class="value"><%= transaction.guarantorId %></span>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <div class="empty-state">
+          <span class="empty-icon">💳</span>
+          <h3>Нет транзакций</h3>
+          <p>Здесь будут отображаться все транзакции, требующие проверки</p>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <a href="/" class="btn ghost" style="margin-top:14px;">Вернуться на сайт</a>
+  </div>
+
+  <!-- Cards Tab -->
+  <div id="cards-tab" class="tab-content">
+    <h3>Управление карточками</h3>
+    
+    <div class="card">
+      <div class="card-header">
+        <h3>➕ Добавить карточку</h3>
+      </div>
+      <div class="card-content">
+        <form action="/admin/cards/add" method="POST" class="admin-form">
+          <div class="form-group">
+            <label>ID карточки</label>
+            <input name="id" placeholder="c1" required>
+          </div>
+          <div class="form-group">
+            <label>Название</label>
+            <input name="name" placeholder="Название карточки" required>
+          </div>
+          <div class="form-group">
+            <label>Редкость</label>
+            <select name="rarity" required>
+              <option value="common">common</option>
+              <option value="uncommon">uncommon</option>
+              <option value="rare">rare</option>
+              <option value="epic">epic</option>
+              <option value="legendary">legendary</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>URL изображения (опционально)</label>
+            <input name="image" placeholder="https://example.com/image.png">
+          </div>
+          <button class="btn" type="submit">Добавить карточку</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3>📋 Список карточек</h3>
+      </div>
+      <div class="card-content">
+        <% if (cards && cards.length) { %>
+          <div class="cards-grid">
+            <% cards.forEach(c => { %>
+              <div class="card-item">
+                <div class="card-preview">
+                  <% if (c.image) { %>
+                    <img src="<%= c.image %>" alt="<%= c.name %>" class="card-image">
+                  <% } else { %>
+                    <div class="card-placeholder">🃏</div>
+                  <% } %>
+                </div>
+                <div class="card-info">
+                  <h4><%= c.name %></h4>
+                  <span class="card-rarity rarity-<%= c.rarity %>"><%= c.rarity %></span>
+                  <span class="card-id">ID: <%= c.id %></span>
+                </div>
+                <form action="/admin/cards/delete" method="POST" class="card-actions">
+                  <input type="hidden" name="id" value="<%= c.id %>">
+                  <button class="btn danger" type="submit">Удалить</button>
+                </form>
+              </div>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="empty-state">
+            <span class="empty-icon">🃏</span>
+            <p>Нет карточек</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pending Transactions Tab -->
+  <div id="pending-tab" class="tab-content">
+    <h3>Сделки, ожидающие подтверждения</h3>
+    
+    <div class="card">
+      <div class="card-header">
+        <h3>⏳ Ожидают подтверждения</h3>
+      </div>
+      <div class="card-content">
+        <div id="pending-transactions">
+          <div class="loading">Загрузка транзакций...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Listings Management Tab -->
+  <div id="listings-tab" class="tab-content">
+    <h3>Управление лотами</h3>
+    
+    <div class="card">
+      <div class="card-header">
+        <h3>📋 Все лоты</h3>
+      </div>
+      <div class="card-content">
+        <div id="all-listings">
+          <div class="loading">Загрузка лотов...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Collections Tab -->
+  <div id="collections-tab" class="tab-content">
+    <h3>Управление коллекциями</h3>
+    
+    <div class="card">
+      <div class="card-header">
+        <h3>➕ Создать коллекцию</h3>
+      </div>
+      <div class="card-content">
+        <form action="/admin/collections/add" method="POST" class="admin-form">
+          <div class="form-group">
+            <label>ID коллекции</label>
+            <input name="id" placeholder="collection_1" required>
+          </div>
+          <div class="form-group">
+            <label>Название коллекции</label>
+            <input name="name" placeholder="Запуск 2025" required>
+          </div>
+          <div class="form-group">
+            <label>Описание</label>
+            <textarea name="description" placeholder="Первая коллекция карт" required></textarea>
+          </div>
+          <div class="form-group">
+            <label>Награда за завершение (NMCoin)</label>
+            <input name="reward" type="number" placeholder="1000" required>
+          </div>
+          <button class="btn" type="submit">Создать коллекцию</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3>🏆 Список коллекций</h3>
+      </div>
+      <div class="card-content">
+        <div id="collections-list">
+          <div class="loading">Загрузка коллекций...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users Tab -->
+  <div id="users-tab" class="tab-content">
+    <h3>Управление пользователями</h3>
+    
+    <!-- User Role Management -->
+    <div class="card">
+      <div class="card-header">
+        <h3>👥 Управление ролями</h3>
+      </div>
+      <div class="card-content">
+        <form id="change-role-form" class="admin-form">
+          <div class="form-group">
+            <label>ID пользователя</label>
+            <input type="text" id="role-user-id" name="userId" placeholder="613717721867354122" required class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Новая роль</label>
+            <select id="user-role" name="role" required class="form-input">
+              <option value="user">Пользователь</option>
+              <option value="moderator">Модератор</option>
+              <option value="admin">Администратор</option>
+            </select>
+          </div>
+          <button type="submit" class="btn">
+            <span class="btn-icon">👑</span>
+            Изменить роль
+          </button>
+        </form>
+      </div>
+    </div>
+    
+    <!-- Users List -->
+    <div class="card">
+      <div class="card-header">
+        <h3>📋 Список пользователей</h3>
+        <button onclick="loadUsers()" class="btn btn-secondary">Обновить</button>
+      </div>
+      <div class="card-content">
+        <div id="users-list" class="users-list">
+          <div class="loading">Загрузка пользователей...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Support Tab -->
+  <div id="support-tab" class="tab-content">
+    <h3>Система поддержки</h3>
+    
+    <div class="card">
+      <div class="card-header">
+        <h3>🎧 Обращения пользователей</h3>
+        <button onclick="loadSupportTickets()" class="btn btn-secondary">🔄 Обновить</button>
+      </div>
+      <div class="card-content">
+        <div id="support-tickets-list">
+          <div class="loading">Загрузка обращений...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Support Response Modal -->
+    <div id="support-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Ответить на обращение</h3>
+          <button onclick="closeSupportModal()" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div id="ticket-details"></div>
+          <form id="support-response-form">
+            <div class="form-group">
+              <label>Ответ:</label>
+              <textarea id="support-response" rows="4" required class="form-input"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Статус:</label>
+              <select id="support-status" class="form-input">
+                <option value="in_progress">В работе</option>
+                <option value="closed">Закрыто</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">📤 Отправить ответ</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+function showTab(tabName) {
+  // Hide all tabs
+  const tabs = document.querySelectorAll('.tab-content');
+  tabs.forEach(tab => tab.classList.remove('active'));
+  
+  // Remove active class from all buttons
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach(btn => btn.classList.remove('active'));
+  
+  // Show selected tab
+  document.getElementById(tabName + '-tab').classList.add('active');
+  
+  // Add active class to clicked button
+  event.target.classList.add('active');
+  
+  // Load data for specific tabs
+  if (tabName === 'pending') {
+    loadPendingTransactions();
+  } else if (tabName === 'collections') {
+    loadCollections();
+  } else if (tabName === 'listings') {
+    loadAllListings();
+  } else if (tabName === 'users') {
+    loadUsers();
+  }
+}
+
+// Load pending transactions
+async function loadPendingTransactions() {
+  try {
+    const response = await fetch('/api/admin/pending-transactions');
+    const data = await response.json();
+    
+    const container = document.getElementById('pending-transactions');
+    
+    if (data.success && data.transactions.length > 0) {
+      container.innerHTML = '';
+      data.transactions.forEach(transaction => {
+        const transactionElement = document.createElement('div');
+        transactionElement.className = 'transaction-item';
+        transactionElement.innerHTML = `
+          <div class="transaction-info">
+            <h4>${transaction.title}</h4>
+            <p>Продавец: ${transaction.ownerName}</p>
+            <p>Покупатель: ${transaction.buyerName || 'Неизвестно'}</p>
+            <p>Цена: ${transaction.price} NMCoin</p>
+            <p>Статус: ${transaction.status}</p>
+            <p>Создано: ${new Date(transaction.createdAt).toLocaleString()}</p>
+          </div>
+          <div class="transaction-actions">
+            <button class="btn success" onclick="approveTransaction('${transaction.id}')">
+              ✅ Одобрить
+            </button>
+            <button class="btn danger" onclick="rejectTransaction('${transaction.id}')">
+              ❌ Отклонить
+            </button>
+          </div>
+        `;
+        container.appendChild(transactionElement);
+      });
+    } else {
+      container.innerHTML = '<div class="empty-state"><span class="empty-icon">✅</span><p>Нет транзакций, ожидающих подтверждения</p></div>';
+    }
+  } catch (error) {
+    console.error('Error loading pending transactions:', error);
+    document.getElementById('pending-transactions').innerHTML = 
+      '<div class="error">Ошибка загрузки транзакций</div>';
+  }
+}
+
+// Approve transaction
+async function approveTransaction(transactionId) {
+  if (!confirm('Одобрить эту сделку?')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/admin/approve-transaction/${transactionId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('Сделка одобрена!');
+      loadPendingTransactions();
+    } else {
+      alert('Ошибка при одобрении: ' + (data.error || 'Неизвестная ошибка'));
+    }
+  } catch (error) {
+    console.error('Error approving transaction:', error);
+    alert('Ошибка при одобрении: ' + error.message);
+  }
+}
+
+// Reject transaction
+async function rejectTransaction(transactionId) {
+  const reason = prompt('Причина отклонения:');
+  if (!reason) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/admin/reject-transaction/${transactionId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ reason: reason })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('Сделка отклонена!');
+      loadPendingTransactions();
+    } else {
+      alert('Ошибка при отклонении: ' + (data.error || 'Неизвестная ошибка'));
+    }
+  } catch (error) {
+    console.error('Error rejecting transaction:', error);
+    alert('Ошибка при отклонении: ' + error.message);
+  }
+}
+
+// Get status text for display
+function getStatusText(status) {
+  const statusNames = {
+    'open': 'Открыт',
+    'active': 'Активен',
+    'sold': 'Продан',
+    'expired': 'Истек',
+    'closed': 'Закрыт'
+  };
+  return statusNames[status] || status;
+}
+
+// Load all listings for admin management
+async function loadAllListings() {
+  try {
+    const response = await fetch('/api/market/listings');
+    const data = await response.json();
+    
+    const container = document.getElementById('all-listings');
+    
+    if (data.success && data.listings.length > 0) {
+      container.innerHTML = '';
+      data.listings.forEach(listing => {
+        const listingElement = document.createElement('div');
+        listingElement.className = 'listing-item';
+        listingElement.innerHTML = `
+          <div class="listing-info">
+            <h4>${listing.title}</h4>
+            <p>${listing.description}</p>
+            <div class="listing-meta">
+              <span class="listing-price">${listing.price} NMCoin</span>
+              <span class="listing-type">${listing.type === 'auction' ? 'Аукцион' : listing.type === 'permanent' ? 'Постоянная продажа' : 'Прямая продажа'}</span>
+              <span class="listing-status status-${listing.status}">${getStatusText(listing.status)}</span>
+              ${listing.pinned ? '<span class="listing-pinned">📌 Закреплен</span>' : ''}
+              ${listing.permanent ? '<span class="listing-permanent">♾️ Постоянный</span>' : ''}
+              <span class="listing-owner">Владелец: ${listing.ownerName}</span>
+            </div>
+            <div class="listing-details">
+              <span>Создано: ${new Date(listing.createdAt).toLocaleString()}</span>
+              ${listing.buyerName ? `<span>Покупатель: ${listing.buyerName}</span>` : ''}
+            </div>
+          </div>
+          <div class="listing-actions">
+            <button class="btn ${listing.pinned ? 'warning' : 'secondary'}" onclick="togglePinListing('${listing.id}', ${!listing.pinned})">
+              ${listing.pinned ? '📌 Открепить' : '📌 Закрепить'}
+            </button>
+            <button class="btn danger" onclick="adminDeleteListing('${listing.id}')">
+              🗑️ Удалить лот
+            </button>
+            ${listing.status === 'open' ? `
+              <button class="btn warning" onclick="closeListing('${listing.id}')">
+                🔒 Закрыть лот
+              </button>
+            ` : ''}
+          </div>
+        `;
+        container.appendChild(listingElement);
+      });
+    } else {
+      container.innerHTML = '<div class="empty-state"><span class="empty-icon">📦</span><p>Нет лотов</p></div>';
+    }
+  } catch (error) {
+    console.error('Error loading listings:', error);
+    document.getElementById('all-listings').innerHTML = 
+      '<div class="error">Ошибка загрузки лотов</div>';
+  }
+}
+
+// Admin delete listing
+async function adminDeleteListing(listingId) {
+  if (!confirm('Вы уверены, что хотите удалить этот лот? Это действие нельзя отменить!')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/admin/delete-listing/${listingId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('Лот успешно удален!');
+      loadAllListings();
+    } else {
+      alert('Ошибка при удалении лота: ' + (data.error || 'Неизвестная ошибка'));
+    }
+  } catch (error) {
+    console.error('Error deleting listing:', error);
+    alert('Ошибка при удалении лота: ' + error.message);
+  }
+}
+
+// Close listing
+async function closeListing(listingId) {
+  if (!confirm('Закрыть этот лот? Покупатели больше не смогут его купить.')) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/admin/close-listing/${listingId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert('Лот успешно закрыт!');
+      loadAllListings();
+    } else {
+      alert('Ошибка при закрытии лота: ' + (data.error || 'Неизвестная ошибка'));
+    }
+  } catch (error) {
+    console.error('Error closing listing:', error);
+    alert('Ошибка при закрытии лота: ' + error.message);
+  }
+}
+
+// Toggle pin listing
+async function togglePinListing(listingId, pinned) {
+  const action = pinned ? 'закрепить' : 'открепить';
+  if (!confirm(`Вы уверены, что хотите ${action} этот лот?`)) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`/api/admin/pin-listing/${listingId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ pinned: pinned })
+    });
+    
+    const data = await response.json();
+    
+    if (data.success) {
+      alert(data.message);
+      loadAllListings();
+    } else {
+      alert('Ошибка: ' + (data.error || 'Неизвестная ошибка'));
+    }
+  } catch (error) {
+    console.error('Error toggling pin:', error);
+    alert('Ошибка при изменении статуса закрепления: ' + error.message);
+  }
+}
+
+// Load collections
+async function loadCollections() {
+  try {
+    const response = await fetch('/api/admin/collections');
+    const data = await response.json();
+    
+    const container = document.getElementById('collections-list');
+    
+    if (data.success && data.collections.length > 0) {
+      container.innerHTML = '';
+      data.collections.forEach(collection => {
+        const collectionElement = document.createElement('div');
+        collectionElement.className = 'collection-item';
+        collectionElement.innerHTML = `
+          <div class="collection-info">
+            <h4>${collection.name}</h4>
+            <p>${collection.description}</p>
+            <div class="collection-stats">
+              <span>Карт: ${collection.cards ? collection.cards.length : 0}</span>
+              <span>Награда: ${collection.reward} NMCoin</span>
+            </div>
+          </div>
+          <div class="collection-actions">
+            <button class="btn" onclick="editCollection('${collection.id}')">
+              ✏️ Редактировать
+            </button>
+            <button class="btn danger" onclick="deleteCollection('${collection.id}')">
+              🗑️ Удалить
+            </button>
+          </div>
+        `;
+        container.appendChild(collectionElement);
+      });
+    } else {
+      container.innerHTML = '<div class="empty-state"><span class="empty-icon">🏆</span><p>Нет коллекций</p></div>';
+    }
+  } catch (error) {
+    console.error('Error loading collections:', error);
+    document.getElementById('collections-list').innerHTML = 
+      '<div class="error">Ошибка загрузки коллекций</div>';
+  }
+}
+
+// Auto-show tab based on URL parameter
+document.addEventListener('DOMContentLoaded', function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const tab = urlParams.get('tab');
+  if (tab) {
+    showTab(tab);
+  }
+  
+  // Load data for specific tabs
+  if (tab === 'pending') {
+    loadPendingTransactions();
+  } else if (tab === 'collections') {
+    loadCollections();
+  }
+  
+  // Handle coin giving form
+  const giveCoinsForm = document.getElementById('give-coins-form');
+  if (giveCoinsForm) {
+    giveCoinsForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const amount = document.getElementById('coin-amount').value;
+      const userId = document.getElementById('user-id').value;
+      
+      try {
+        const response = await fetch('/admin/give-coins', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            amount: parseInt(amount),
+            userId: userId || null
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          alert(`Получено ${amount} NMCoin! Новый баланс: ${result.newBalance} NMCoin`);
+          location.reload();
+        } else {
+          alert('Ошибка при выдаче монет: ' + (result.error || 'Неизвестная ошибка'));
+        }
+      } catch (error) {
+        console.error('Error giving coins:', error);
+        alert('Ошибка при выдаче монет: ' + error.message);
+      }
+    });
+  }
+  
+  // Load support tickets if on support tab
+  if (tab === 'support') {
+    loadSupportTickets();
+  }
+  
+  // Load users if on users tab
+  if (tab === 'users') {
+    loadUsers();
+  }
+  
+  // Handle role change form
+  const changeRoleForm = document.getElementById('change-role-form');
+  if (changeRoleForm) {
+    changeRoleForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const userId = document.getElementById('role-user-id').value;
+      const role = document.getElementById('user-role').value;
+      
+      if (!confirm(`Изменить роль пользователя ${userId} на ${role}?`)) {
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/admin/change-role', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ 
+            userId: userId,
+            role: role
+          })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          alert(`Роль пользователя успешно изменена на ${role}!`);
+          loadUsers(); // Refresh users list
+          changeRoleForm.reset();
+        } else {
+          alert('Ошибка при изменении роли: ' + (result.error || 'Неизвестная ошибка'));
+        }
+      } catch (error) {
+        console.error('Error changing role:', error);
+        alert('Ошибка при изменении роли: ' + error.message);
+      }
+    });
+  }
+});
+
+// Users management functions
+async function loadUsers() {
+  console.log('🔄 Loading users...');
+  const usersList = document.getElementById('users-list');
+  usersList.innerHTML = '<div class="loading">Загрузка пользователей...</div>';
+  
+  try {
+    const response = await fetch('/api/admin/users');
+    console.log('📡 Response status:', response.status);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    
+    const data = await response.json();
+    console.log('📊 Users data:', data);
+    
+    if (data.success && data.users && data.users.length > 0) {
+      console.log(`✅ Found ${data.users.length} users`);
+      usersList.innerHTML = data.users.map(user => `
+        <div class="user-item">
+          <div class="user-info">
+            <img class="user-avatar" src="${user.avatar || '/images/default-avatar.png'}" alt="Avatar" onerror="this.src='/images/default-avatar.png'">
+            <div class="user-details">
+              <div class="user-name">${user.name || 'Неизвестный пользователь'}</div>
+              <div class="user-id">ID: ${user.id}</div>
+              <div class="user-role role-${user.role || 'user'}">${getRoleName(user.role || 'user')}</div>
+            </div>
+          </div>
+          <div class="user-stats">
+            <div class="stat-item">
+              <span class="stat-label">Баланс:</span>
+              <span class="stat-value">${user.balance || 0} NMCoin</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Карт:</span>
+              <span class="stat-value">${(user.inventory || []).length}</span>
+            </div>
+          </div>
+          <div class="user-actions">
+            <button onclick="quickChangeRole('${user.id}', '${user.role || 'user'}')" class="btn btn-small">
+              Изменить роль
+            </button>
+          </div>
+        </div>
+      `).join('');
+    } else if (data.success && (!data.users || data.users.length === 0)) {
+      console.log('⚠️ No users found');
+      usersList.innerHTML = '<div class="empty-users"><p>Пользователи не найдены</p></div>';
+    } else {
+      console.log('❌ API returned error:', data.error);
+      usersList.innerHTML = `<div class="error">Ошибка: ${data.error || 'Неизвестная ошибка'}</div>`;
+    }
+  } catch (error) {
+    console.error('❌ Error loading users:', error);
+    usersList.innerHTML = `<div class="error">Ошибка загрузки пользователей: ${error.message}</div>`;
+  }
+}
+
+function getRoleName(role) {
+  const roleNames = {
+    'user': 'Пользователь',
+    'moderator': 'Модератор',
+    'admin': 'Администратор'
+  };
+  return roleNames[role] || 'Пользователь';
+}
+
+function quickChangeRole(userId, currentRole) {
+  const roles = ['user', 'moderator', 'admin'];
+  const roleNames = ['Пользователь', 'Модератор', 'Администратор'];
+  
+  let options = '';
+  roles.forEach((role, index) => {
+    const selected = role === currentRole ? 'selected' : '';
+    options += `<option value="${role}" ${selected}>${roleNames[index]}</option>`;
+  });
+  
+  const newRole = prompt(`Выберите новую роль для пользователя ${userId}:\n\n1 - Пользователь\n2 - Модератор\n3 - Администратор\n\nВведите номер (1-3):`);
+  
+  if (newRole && newRole >= 1 && newRole <= 3) {
+    const selectedRole = roles[newRole - 1];
+    
+    // Fill the form and submit
+    document.getElementById('role-user-id').value = userId;
+    document.getElementById('user-role').value = selectedRole;
+    document.getElementById('change-role-form').dispatchEvent(new Event('submit'));
+  }
+}
+
+// Support ticket functions
+let currentTicketId = null;
+
+async function loadSupportTickets() {
+  try {
+    const response = await fetch('/api/admin/support/tickets');
+    const result = await response.json();
+    
+    const ticketsList = document.getElementById('support-tickets-list');
+    
+    if (result.success && result.tickets.length > 0) {
+      ticketsList.innerHTML = result.tickets.map(ticket => `
+        <div class="ticket-item admin-ticket ${ticket.status}">
+          <div class="ticket-header">
+            <span class="ticket-id">#${ticket.id}</span>
+            <span class="ticket-user">👤 ${ticket.userName}</span>
+            <span class="ticket-subject">${getSubjectIcon(ticket.subject)} ${getSubjectName(ticket.subject)}</span>
+            <span class="ticket-status status-${ticket.status}">${getStatusName(ticket.status)}</span>
+          </div>
+          <div class="ticket-message">${ticket.message}</div>
+          <div class="ticket-date">Создано: ${new Date(ticket.createdAt).toLocaleString('ru-RU')}</div>
+          ${ticket.response ? `
+            <div class="ticket-response">
+              <strong>Ответ:</strong> ${ticket.response}
+              <div class="response-date">Отвечено: ${new Date(ticket.responseAt).toLocaleString('ru-RU')}</div>
+            </div>
+          ` : ''}
+          <div class="ticket-actions">
+            <button onclick="respondToTicket('${ticket.id}')" class="btn btn-primary btn-small">
+              ${ticket.response ? '✏️ Изменить ответ' : '💬 Ответить'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      ticketsList.innerHTML = '<p class="no-tickets">Обращений пока нет</p>';
+    }
+  } catch (error) {
+    document.getElementById('support-tickets-list').innerHTML = '<p class="error">Ошибка загрузки обращений</p>';
+    console.error('Error loading support tickets:', error);
+  }
+}
+
+function respondToTicket(ticketId) {
+  currentTicketId = ticketId;
+  
+  // Find ticket data
+  fetch('/api/admin/support/tickets')
+    .then(response => response.json())
+    .then(result => {
+      if (result.success) {
+        const ticket = result.tickets.find(t => t.id === ticketId);
+        if (ticket) {
+          document.getElementById('ticket-details').innerHTML = `
+            <div class="ticket-details">
+              <h4>Обращение #${ticket.id}</h4>
+              <p><strong>Пользователь:</strong> ${ticket.userName}</p>
+              <p><strong>Тема:</strong> ${getSubjectIcon(ticket.subject)} ${getSubjectName(ticket.subject)}</p>
+              <p><strong>Сообщение:</strong></p>
+              <div class="original-message">${ticket.message}</div>
+              <p><strong>Дата создания:</strong> ${new Date(ticket.createdAt).toLocaleString('ru-RU')}</p>
+            </div>
+          `;
+          
+          // Pre-fill response if exists
+          if (ticket.response) {
+            document.getElementById('support-response').value = ticket.response;
+            document.getElementById('support-status').value = ticket.status;
+          } else {
+            document.getElementById('support-response').value = '';
+            document.getElementById('support-status').value = 'in_progress';
+          }
+          
+          document.getElementById('support-modal').style.display = 'block';
+        }
+      }
+    });
+}
+
+function closeSupportModal() {
+  document.getElementById('support-modal').style.display = 'none';
+  currentTicketId = null;
+}
+
+// Handle support response form
+document.getElementById('support-response-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  if (!currentTicketId) return;
+  
+  const response = document.getElementById('support-response').value;
+  const status = document.getElementById('support-status').value;
+  
+  try {
+    const result = await fetch('/api/admin/support/respond', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        ticketId: currentTicketId,
+        response: response,
+        status: status
+      })
+    });
+    
+    const data = await result.json();
+    
+    if (data.success) {
+      alert('✅ Ответ успешно отправлен!');
+      closeSupportModal();
+      loadSupportTickets();
+    } else {
+      alert('❌ Ошибка при отправке ответа: ' + data.error);
+    }
+  } catch (error) {
+    alert('❌ Произошла ошибка при отправке ответа');
+    console.error('Error:', error);
+  }
+});
+
+function getSubjectIcon(subject) {
+  const icons = {
+    'technical': '🔧',
+    'payment': '💰',
+    'trading': '🛒',
+    'account': '👤',
+    'ban': '⚠️',
+    'bug': '🐛',
+    'suggestion': '💡',
+    'other': '❓'
+  };
+  return icons[subject] || '❓';
+}
+
+function getSubjectName(subject) {
+  const names = {
+    'technical': 'Техническая проблема',
+    'payment': 'Вопрос по платежам',
+    'trading': 'Проблема с торговлей',
+    'account': 'Вопрос по аккаунту',
+    'ban': 'Обжалование бана',
+    'bug': 'Сообщение об ошибке',
+    'suggestion': 'Предложение',
+    'other': 'Другое'
+  };
+  return names[subject] || 'Неизвестно';
+}
+
+function getStatusName(status) {
+  const names = {
+    'open': 'Открыто',
+    'in_progress': 'В работе',
+    'closed': 'Закрыто'
+  };
+  return names[status] || status;
+}
+</script>
+<script src="/js/ui-effects.js"></script>
+<script src="/js/dropdown.js"></script>
+<script src="/js/theme-switcher.js"></script>
+</body>
+</html>

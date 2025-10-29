@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Вход администратора - NoMercy Marketplace</title>
+  <link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">NoMercy</a>
+    <div class="nav-buttons">
+      <a href="/" class="btn">Назад на сайт</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="login-icon">🔐</div>
+          <h2>Вход администратора</h2>
+          <p class="login-subtitle">Введите пароль для доступа к панели управления</p>
+        </div>
+        
+        <% if (error) { %>
+          <div class="error-message">
+            <span class="error-icon">⚠️</span>
+            <%= error %>
+          </div>
+        <% } %>
+        
+        <form method="POST" action="/logadmin" class="login-form">
+          <div class="form-group">
+            <label for="password">Пароль администратора</label>
+            <input type="password" id="password" name="password" required 
+                   placeholder="Введите пароль..." class="form-input">
+          </div>
+          
+          <button type="submit" class="btn login-btn">
+            <span class="btn-icon">🚀</span>
+            Войти как администратор
+          </button>
+        </form>
+        
+        <div class="login-footer">
+          <p class="small">Только для авторизованных администраторов</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .login-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 60vh;
+      padding: 20px;
+    }
+    
+    .login-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: var(--shadow-lg);
+      backdrop-filter: blur(10px);
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .login-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    .login-header h2 {
+      color: var(--text);
+      margin: 0 0 8px 0;
+      font-size: 24px;
+      font-weight: 700;
+    }
+    
+    .login-subtitle {
+      color: var(--text-secondary);
+      margin: 0;
+      font-size: 14px;
+    }
+    
+    .login-form {
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 16px;
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .form-input::placeholder {
+      color: var(--text-secondary);
+    }
+    
+    .login-btn {
+      width: 100%;
+      padding: 14px 20px;
+      background: var(--gradient);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .login-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+    }
+    
+    .btn-icon {
+      font-size: 18px;
+    }
+    
+    .login-footer {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    
+    .login-footer .small {
+      color: var(--text-secondary);
+      margin: 0;
+      font-size: 12px;
+    }
+    
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #fca5a5;
+      font-size: 14px;
+    }
+    
+    .error-icon {
+      font-size: 16px;
+    }
+  </style>
+</body>
+</html>

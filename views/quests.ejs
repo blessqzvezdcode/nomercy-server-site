@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Квесты - NoMercy Marketplace</title>
+  <link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/quests.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="brand">NoMercy</a>
+        <div class="nav-buttons">
+            <% if (user) { %>
+                <a href="/messenger" class="nav-messenger-btn" title="Мессенджер">💬</a>
+                <div class="dropdown">
+                    <button class="dropdown-toggle">
+                        <span>👤 <%= user.name %> (💰 <%= balance %>)</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/" class="dropdown-item">🏠 Главная</a>
+                        <a href="/profile/<%= user.id %>" class="dropdown-item">👤 Профиль</a>
+                        <a href="/market" class="dropdown-item">🛒 Маркет</a>
+                        <a href="/cards" class="dropdown-item">🃏 Карты</a>
+                        <a href="/quests" class="dropdown-item active">⚔️ Квесты</a>
+                        <a href="/games" class="dropdown-item">🎮 Игры</a>
+                        <a href="/news" class="dropdown-item">📰 Новости</a>
+                        <a href="/faq" class="dropdown-item">❓ FAQ</a>
+                        <a href="/achievements" class="dropdown-item">🏆 Достижения</a>
+                        <a href="/support" class="dropdown-item">🎧 Поддержка</a>
+                        <div class="dropdown-divider"></div>
+                        <% if (user.role === 'admin') { %>
+                            <a href="/admin" class="dropdown-item">⚙️ Админка</a>
+                            <div class="dropdown-divider"></div>
+                        <% } %>
+                        <button class="dropdown-item theme-toggle" id="theme-toggle">🌙 Светлая тема</button>
+                        <div class="dropdown-divider"></div>
+                        <a href="/logout" class="dropdown-item">🚪 Выйти</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <a href="/auth/discord" class="btn">Войти через Discord</a>
+            <% } %>
+        </div>
+    </nav>
+
+<div class="container">
+  <div class="quests-header">
+    <h1>🎯 Система квестов</h1>
+    <p class="quests-subtitle">Выполняйте ежедневные задания и получайте награды!</p>
+  </div>
+
+  <!-- Daily Quest -->
+  <div class="quest-card">
+    <div class="quest-header">
+      <div class="quest-icon">📅</div>
+      <div class="quest-info">
+        <h3>Ежедневный квест</h3>
+        <p>Заходите на сайт каждый день и получайте увеличивающиеся награды!</p>
+      </div>
+      <div class="quest-status">
+        <% if (canClaimDaily) { %>
+          <span class="status-available">✅ Доступно</span>
+        <% } else { %>
+          <span class="status-claimed">⏰ Уже получено</span>
+        <% } %>
+      </div>
+    </div>
+    
+    <div class="quest-details">
+      <div class="quest-reward">
+        <span class="reward-label">Награда:</span>
+        <span class="reward-amount">
+          <% if (canClaimDaily) { %>
+            <%= 10 * Math.pow(2, (user.dailyStreak || 0)) %> NMCoin
+          <% } else { %>
+            <%= 10 * Math.pow(2, (user.dailyStreak || 0)) %> NMCoin
+          <% } %>
+        </span>
+      </div>
+      
+      <div class="quest-streak">
+        <span class="streak-label">Серия дней:</span>
+        <span class="streak-count"><%= user.dailyStreak || 0 %> дней</span>
+      </div>
+      
+      <% if (canClaimDaily) { %>
+        <button class="btn claim-btn" onclick="claimDaily()">
+          <span class="btn-icon">💰</span>
+          Получить награду
+        </button>
+      <% } else { %>
+        <div class="quest-cooldown">
+          <span class="cooldown-text">Следующий квест будет доступен завтра</span>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Monthly Bonus -->
+  <div class="quest-card">
+    <div class="quest-header">
+      <div class="quest-icon">🎁</div>
+      <div class="quest-info">
+        <h3>Ежемесячный бонус</h3>
+        <p>Получайте 500 NMCoin каждый месяц за активность!</p>
+      </div>
+      <div class="quest-status">
+        <% if (canClaimMonthly) { %>
+          <span class="status-available">✅ Доступно</span>
+        <% } else { %>
+          <span class="status-claimed">⏰ Уже получено</span>
+        <% } %>
+      </div>
+    </div>
+    
+    <div class="quest-details">
+      <div class="quest-reward">
+        <span class="reward-label">Награда:</span>
+        <span class="reward-amount">500 NMCoin</span>
+      </div>
+      
+      <% if (canClaimMonthly) { %>
+        <button class="btn claim-btn" onclick="claimMonthly()">
+          <span class="btn-icon">🎁</span>
+          Получить бонус
+        </button>
+      <% } else { %>
+        <div class="quest-cooldown">
+          <span class="cooldown-text">Следующий бонус будет доступен в следующем месяце</span>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Quest History -->
+  <div class="quest-history">
+    <h3>📊 История квестов</h3>
+    <div class="history-stats">
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-info">
+          <div class="stat-value"><%= user.dailyStreak || 0 %></div>
+          <div class="stat-label">Дней подряд</div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-info">
+          <div class="stat-value"><%= user.totalEarned || 0 %></div>
+          <div class="stat-label">Всего заработано</div>
+        </div>
+      </div>
+      
+      <div class="stat-card">
+        <div class="stat-icon">🏆</div>
+        <div class="stat-info">
+          <div class="stat-value"><%= user.questsCompleted || 0 %></div>
+          <div class="stat-label">Квестов выполнено</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function claimDaily() {
+  try {
+    const response = await fetch('/quests/daily', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      alert(`Получено ${result.reward} NMCoin! Новый баланс: ${result.newBalance} NMCoin`);
+      location.reload();
+    } else {
+      alert('Ошибка при получении награды');
+    }
+  } catch (error) {
+    alert('Ошибка при получении награды');
+  }
+}
+
+async function claimMonthly() {
+  try {
+    const response = await fetch('/quests/monthly', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      alert(`Получено ${result.reward} NMCoin! Новый баланс: ${result.newBalance} NMCoin`);
+      location.reload();
+    } else {
+      alert('Ошибка при получении награды');
+    }
+  } catch (error) {
+    alert('Ошибка при получении награды');
+  }
+}
+</script>
+<script src="/js/dropdown.js"></script>
+<script src="/js/theme-switcher.js"></script>
+</body>
+</html>

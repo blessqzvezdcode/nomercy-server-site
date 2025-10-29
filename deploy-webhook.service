@@ -1,0 +1,21 @@
+[Unit]
+Description=GitHub Webhook Deploy Service
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/var/www/nomercy-server-site
+ExecStart=/usr/bin/node /var/www/nomercy-server-site/deploy-webhook.js
+Restart=always
+RestartSec=10
+Environment=NODE_ENV=production
+Environment=WEBHOOK_SECRET=nmercy.onlin3BLESSED
+
+# Логирование
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=deploy-webhook
+
+[Install]
+WantedBy=multi-user.target

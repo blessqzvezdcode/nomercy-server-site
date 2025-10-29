@@ -1,0 +1,15 @@
+[
+  {
+    "id": "60663646-03e7-4c3f-8a7a-b751cc3268e6",
+    "listingId": "d05bde6f-ddc0-4651-a16b-d4de186c4807",
+    "buyerId": "613717721867354122",
+    "sellerId": null,
+    "amount": 1,
+    "status": "pending_guarantor",
+    "createdAt": 1761402278773,
+    "buyerConfirmed": false,
+    "sellerConfirmed": false,
+    "guarantorApproved": false,
+    "guarantorId": null
+  }
+]

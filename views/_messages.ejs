@@ -1,0 +1,136 @@
+<!-- Messages Widget -->
+<div class="messages-widget" id="messagesWidget">
+  <div class="messages-header" onclick="toggleMessages()">
+    <div class="messages-title">
+      <span class="messages-icon">💬</span>
+      <span>Сообщения</span>
+      <span class="messages-count" id="messagesCount">0</span>
+    </div>
+    <div class="messages-toggle" id="messagesToggle">▼</div>
+  </div>
+  
+  <div class="messages-content" id="messagesContent" style="display: none;">
+    <div class="messages-list" id="messagesList">
+      <div class="empty-messages">
+        <span class="empty-icon">📭</span>
+        <p>Нет новых сообщений</p>
+      </div>
+    </div>
+    
+    <div class="messages-compose">
+      <div class="compose-header">
+        <span>Новое сообщение</span>
+      </div>
+      <form id="messageForm" class="message-form">
+        <div class="form-group">
+          <input type="text" id="messageRecipient" placeholder="ID получателя" required>
+        </div>
+        <div class="form-group">
+          <textarea id="messageText" placeholder="Текст сообщения" required rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn">Отправить</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+let messages = JSON.parse(localStorage.getItem('messages') || '[]');
+let isMessagesOpen = false;
+
+function toggleMessages() {
+  const content = document.getElementById('messagesContent');
+  const toggle = document.getElementById('messagesToggle');
+  
+  isMessagesOpen = !isMessagesOpen;
+  
+  if (isMessagesOpen) {
+    content.style.display = 'block';
+    toggle.textContent = '▲';
+  } else {
+    content.style.display = 'none';
+    toggle.textContent = '▼';
+  }
+}
+
+function updateMessagesCount() {
+  const unreadCount = messages.filter(m => !m.read).length;
+  document.getElementById('messagesCount').textContent = unreadCount;
+}
+
+function loadMessages() {
+  const messagesList = document.getElementById('messagesList');
+  
+  if (messages.length === 0) {
+    messagesList.innerHTML = `
+      <div class="empty-messages">
+        <span class="empty-icon">📭</span>
+        <p>Нет сообщений</p>
+      </div>
+    `;
+    return;
+  }
+  
+  messagesList.innerHTML = messages.map(message => `
+    <div class="message-item ${message.read ? '' : 'unread'}" onclick="markAsRead('${message.id}')">
+      <div class="message-header">
+        <span class="message-from">От: ${message.from}</span>
+        <span class="message-time">${new Date(message.timestamp).toLocaleString('ru-RU')}</span>
+      </div>
+      <div class="message-text">${message.text}</div>
+    </div>
+  `).join('');
+}
+
+function markAsRead(messageId) {
+  const message = messages.find(m => m.id === messageId);
+  if (message) {
+    message.read = true;
+    localStorage.setItem('messages', JSON.stringify(messages));
+    loadMessages();
+    updateMessagesCount();
+  }
+}
+
+function sendMessage() {
+  const recipient = document.getElementById('messageRecipient').value;
+  const text = document.getElementById('messageText').value;
+  
+  if (!recipient || !text) {
+    alert('Заполните все поля');
+    return;
+  }
+  
+  const message = {
+    id: Date.now().toString(),
+    from: '<%= user ? user.name : "Аноним" %>',
+    to: recipient,
+    text: text,
+    timestamp: new Date().toISOString(),
+    read: false
+  };
+  
+  messages.unshift(message);
+  localStorage.setItem('messages', JSON.stringify(messages));
+  
+  document.getElementById('messageForm').reset();
+  loadMessages();
+  updateMessagesCount();
+  
+  alert('Сообщение отправлено!');
+}
+
+// Event listeners
+document.getElementById('messageForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  sendMessage();
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  loadMessages();
+  updateMessagesCount();
+});
+</script>
+
+

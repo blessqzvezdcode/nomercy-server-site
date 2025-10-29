@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoMercy Server</title>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/index.css">
+</head>
+<body>
+    <nav>
+  <a href="/" class="brand">NoMercy</a>
+  <div class="nav-buttons">
+    <% if (user) { %>
+      <div class="dropdown">
+        <button class="dropdown-toggle">
+          <span>Меню</span>
+        </button>
+        <div class="dropdown-menu">
+          <a href="/profile/<%= user.id %>" class="dropdown-item">👤 Профиль</a>
+          <a href="/market" class="dropdown-item">🛒 Маркет</a>
+          <a href="/cards" class="dropdown-item">🃏 Коллекция</a>
+          <a href="/news" class="dropdown-item">📰 Новости</a>
+          <a href="/quests" class="dropdown-item">📋 Квесты</a>
+          <a href="/games" class="dropdown-item">🎰 Мини-Игры</a>
+          <a href="/achievements" class="dropdown-item">🏆 Достижения</a>
+          <a href="/faq" class="dropdown-item">❓ FAQ</a>
+          <div class="dropdown-divider"></div>
+          <button class="dropdown-item theme-toggle" id="theme-toggle">🌙 Светлая тема</button>
+          <div class="dropdown-divider"></div>
+          <a href="/logout" class="dropdown-item">🚪 Выйти</a>
+        </div>
+      </div>
+    <% } else { %>
+      <a href="/auth/discord" class="btn">Войти через Discord</a>
+    <% } %>
+  </div>
+</nav>
+<% if (user) { %><%- include('_messages') %><% } %>
+
+<div class="container">
+  <% if (user) { %>
+    <div class="welcome-section">
+      <div class="welcome-content">
+        <div class="welcome-text">
+          <h1 class="welcome-title">Добро пожаловать в NoMercy</h1>
+          <p class="welcome-subtitle">Твоя коллекция карт ждет тебя! Открывай паки, торгуй и становись легендой.</p>
+        </div>
+        <div class="balance-card">
+          <div class="balance-header">
+            <span class="balance-icon">💰</span>
+            <span class="balance-label">Твой баланс</span>
+          </div>
+          <div class="balance-amount" id="balance"><%= balance %></div>
+          <div class="balance-user">Привет, <%= user.name %></div>
+        </div>
+      </div>
+    </div>
+  <% } else { %>
+    <!-- Landing Page for Non-Authenticated Users -->
+    <div class="landing-hero">
+      <div class="hero-content">
+        <h1 class="hero-title">NoMercy Marketplace</h1>
+        <p class="hero-subtitle">Безопасная торговая площадка для игровых предметов с системой гарантов</p>
+        <div class="hero-actions">
+          <a href="/auth/discord" class="btn hero-btn">
+            <span class="btn-icon">🚀</span>
+            Войти через Discord
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="features-section">
+      <h2 class="features-title">Почему именно мы?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🛡️</div>
+          <h3>Система гарантов</h3>
+          <p>Все сделки проходят через проверку администраторов для максимальной безопасности</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">💰</div>
+          <h3>Внутренняя валюта</h3>
+          <p>Используйте NMCoin для безопасных транзакций без риска потери средств</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🎮</div>
+          <h3>Мини-игры</h3>
+          <p>Играйте в казино и выигрывайте NMCoin в различных азартных играх</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Система квестов</h3>
+          <p>Выполняйте ежедневные задания и получайте увеличивающиеся награды</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">📰</div>
+          <h3>Новости и обновления</h3>
+          <p>Следите за последними событиями и обновлениями платформы</p>
+        </div>
+        
+        <div class="feature-card">
+          <div class="feature-icon">🏆</div>
+          <h3>Рейтинговая система</h3>
+          <p>Стройте репутацию и получайте доверие других пользователей</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="how-it-works">
+      <h2 class="how-title">Как это работает?</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Войдите через Discord</h3>
+            <p>Быстрая и безопасная авторизация через ваш Discord аккаунт</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Создайте лот</h3>
+            <p>Разместите свой товар на маркете с подробным описанием</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Покупатель делает заказ</h3>
+            <p>Деньги резервируются на платформе до проверки сделки</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>Админ проверяет сделку</h3>
+            <p>Наши модераторы проверяют честность обеих сторон</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">5</div>
+          <div class="step-content">
+            <h3>Сделка завершена</h3>
+            <p>Деньги переводятся продавцу, товар - покупателю</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta-section">
+      <div class="cta-content">
+        <h2>Готовы начать?</h2>
+        <p>Присоединяйтесь к нам</p>
+        <a href="/auth/discord" class="btn cta-btn">
+          <span class="btn-icon">🚀</span>
+          Начать торговлю
+        </a>
+      </div>
+    </div>
+  <% } %>
+
+  <% if (user) { %>
+  <div class="grid">
+    <div class="card feature-card">
+      <div class="feature-icon">🛒</div>
+      <h3>Маркет</h3>
+      <p class="small">Покупай и продавай предметы с другими игроками в безопасной среде.</p>
+      <a href="/market" class="btn">Открыть маркет</a>
+    </div>
+    <div class="card feature-card">
+      <div class="feature-icon">🎴</div>
+      <h3>Коллекция</h3>
+      <p class="small">Собирай уникальные карточки, открывай паки и создавай свою коллекцию.</p>
+      <a href="/cards" class="btn">Открыть коллекцию</a>
+    </div>
+    <% if (user && user.role === 'admin') { %>
+    <div class="card feature-card">
+      <div class="feature-icon">⚙️</div>
+      <h3>Админка</h3>
+      <p class="small">Управление товарами, паками и настройками системы (только для админов).</p>
+      <a href="/admin" class="btn">Открыть админку</a>
+    </div>
+    <% } %>
+  </div>
+
+  <div class="footer">NoMercy MMORPG — магазин внутриигровых предметов и коллекций.</div>
+  <% } %>
+</div>
+<script src="/js/ui-effects.js"></script>
+<script src="/js/dropdown.js"></script>
+<script src="/js/theme-switcher.js"></script>
+</body>
+</html>

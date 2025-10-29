@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Новости - NoMercy Marketplace</title>
+  <link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/news.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="brand">NoMercy</a>
+        <div class="nav-buttons">
+            <% if (user) { %>
+                <a href="/messenger" class="nav-messenger-btn" title="Мессенджер">💬</a>
+                <div class="dropdown">
+                    <button class="dropdown-toggle">
+                        <span>👤 <%= user.name %> (💰 <%= balance %>)</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/" class="dropdown-item">🏠 Главная</a>
+                        <a href="/profile/<%= user.id %>" class="dropdown-item">👤 Профиль</a>
+                        <a href="/market" class="dropdown-item">🛒 Маркет</a>
+                        <a href="/cards" class="dropdown-item">🃏 Карты</a>
+                        <a href="/quests" class="dropdown-item">⚔️ Квесты</a>
+                        <a href="/games" class="dropdown-item">🎮 Игры</a>
+                        <a href="/news" class="dropdown-item active">📰 Новости</a>
+                        <a href="/faq" class="dropdown-item">❓ FAQ</a>
+                        <a href="/achievements" class="dropdown-item">🏆 Достижения</a>
+                        <a href="/support" class="dropdown-item">🎧 Поддержка</a>
+                        <div class="dropdown-divider"></div>
+                        <% if (user.role === 'admin') { %>
+                            <a href="/admin" class="dropdown-item">⚙️ Админка</a>
+                            <div class="dropdown-divider"></div>
+                        <% } %>
+                        <button class="dropdown-item theme-toggle" id="theme-toggle">🌙 Светлая тема</button>
+                        <div class="dropdown-divider"></div>
+                        <a href="/logout" class="dropdown-item">🚪 Выйти</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <a href="/auth/discord" class="btn">Войти через Discord</a>
+            <% } %>
+        </div>
+    </nav>
+
+<div class="container">
+  <div class="news-header">
+    <div class="news-title-section">
+      <h1>📰 Новости и обновления</h1>
+      <p class="news-subtitle">Следите за последними событиями и обновлениями платформы</p>
+    </div>
+    <% if (user && user.role === 'admin') { %>
+      <div class="news-admin-actions">
+        <button onclick="showCreateNewsModal()" class="btn btn-primary">
+          <span>✏️</span>
+          Создать новость
+        </button>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Categories Filter -->
+  <div class="card filters-card">
+    <div class="filters-row">
+      <div class="filter-group">
+        <label>📋 Категория</label>
+        <select id="categoryFilter" class="form-select">
+          <option value="">Все категории</option>
+          <option value="updates">Обновления</option>
+          <option value="events">События</option>
+          <option value="announcements">Объявления</option>
+          <option value="security">Безопасность</option>
+          <option value="market">Маркет</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>📅 Период</label>
+        <select id="periodFilter" class="form-select">
+          <option value="">Все время</option>
+          <option value="today">Сегодня</option>
+          <option value="week">Неделя</option>
+          <option value="month">Месяц</option>
+        </select>
+      </div>
+      <button class="btn" onclick="applyFilters()">
+        <span class="btn-icon">🔍</span>
+        Применить
+      </button>
+    </div>
+  </div>
+
+  <!-- News Grid -->
+  <div class="news-grid">
+    <% if (news && news.length) { %>
+      <% news.forEach(function(article){ %>
+        <div class="news-card" data-category="<%= article.category %>" data-date="<%= article.date %>">
+          <div class="news-card-header">
+            <div class="news-category category-<%= article.category %>">
+              <%= article.category === 'updates' ? '🔄' : 
+                  article.category === 'events' ? '🎉' : 
+                  article.category === 'announcements' ? '📢' : 
+                  article.category === 'security' ? '🔒' : 
+                  article.category === 'market' ? '💰' : '📰' %>
+              <%= article.categoryName || article.category %>
+            </div>
+            <div class="news-date">
+              <%= new Date(article.date).toLocaleDateString('ru-RU') %>
+            </div>
+          </div>
+          
+          <div class="news-content">
+            <h3 class="news-title"><%= article.title %></h3>
+            <p class="news-excerpt"><%= article.excerpt %></p>
+            
+            <% if (article.image) { %>
+              <div class="news-image">
+                <img src="<%= article.image %>" alt="<%= article.title %>">
+              </div>
+            <% } %>
+            
+            <div class="news-meta">
+              <div class="news-author">
+                <span class="author-icon">👤</span>
+                <%= article.author %>
+              </div>
+            </div>
+          </div>
+          
+          <div class="news-actions">
+            <a href="/news/<%= article.id %>" class="btn ghost">
+              <span class="btn-icon">📖</span>
+              Читать далее
+            </a>
+            <% if (user && user.role === 'admin') { %>
+              <a href="/admin/news/edit/<%= article.id %>" class="btn ghost">
+                <span class="btn-icon">✏️</span>
+                Редактировать
+              </a>
+            <% } %>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <div class="empty-state">
+        <span class="empty-icon">📰</span>
+        <h3>Новостей пока нет</h3>
+        <p>Следите за обновлениями, скоро здесь появятся интересные новости!</p>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination">
+    <button class="btn ghost" onclick="loadPage(1)">
+      <span class="btn-icon">⏮️</span>
+      Первая
+    </button>
+    <button class="btn ghost" onclick="loadPage(currentPage - 1)" <%= currentPage <= 1 ? 'disabled' : '' %>>
+      <span class="btn-icon">⬅️</span>
+      Предыдущая
+    </button>
+    <span class="page-info">Страница <%= currentPage || 1 %> из <%= totalPages || 1 %></span>
+    <button class="btn ghost" onclick="loadPage(currentPage + 1)" <%= currentPage >= totalPages ? 'disabled' : '' %>>
+      Следующая
+      <span class="btn-icon">➡️</span>
+    </button>
+    <button class="btn ghost" onclick="loadPage(totalPages)">
+      Последняя
+      <span class="btn-icon">⏭️</span>
+    </button>
+  </div>
+</div>
+
+<!-- Create News Modal -->
+<% if (user && user.role === 'admin') { %>
+<div id="createNewsModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>✏️ Создать новость</h2>
+      <button class="close-btn" onclick="hideCreateNewsModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <form id="createNewsForm" action="/admin/news/create" method="POST">
+        <div class="form-group">
+          <label for="newsTitle">Заголовок:</label>
+          <input type="text" id="newsTitle" name="title" required maxlength="200" class="form-input">
+        </div>
+        <div class="form-group">
+          <label for="newsCategory">Категория:</label>
+          <select id="newsCategory" name="category" required class="form-input">
+            <option value="">Выберите категорию</option>
+            <option value="announcements">📢 Объявления</option>
+            <option value="updates">🔄 Обновления</option>
+            <option value="events">🎉 События</option>
+            <option value="security">🔒 Безопасность</option>
+            <option value="market">💰 Маркет</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="newsExcerpt">Краткое описание:</label>
+          <textarea id="newsExcerpt" name="excerpt" required maxlength="300" rows="3" class="form-input"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="newsContent">Полный текст:</label>
+          <textarea id="newsContent" name="content" required rows="8" class="form-input"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" onclick="hideCreateNewsModal()" class="btn btn-secondary">Отмена</button>
+          <button type="submit" class="btn btn-primary">Создать новость</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<% } %>
+
+<script>
+function applyFilters() {
+  const category = document.getElementById('categoryFilter').value;
+  const period = document.getElementById('periodFilter').value;
+  
+  // Filter logic here
+  const cards = document.querySelectorAll('.news-card');
+  cards.forEach(card => {
+    let show = true;
+    
+    if (category && card.dataset.category !== category) {
+      show = false;
+    }
+    
+    if (period) {
+      const cardDate = new Date(card.dataset.date);
+      const now = new Date();
+      let cutoffDate;
+      
+      switch(period) {
+        case 'today':
+          cutoffDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          break;
+        case 'week':
+          cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+          break;
+        case 'month':
+          cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+          break;
+      }
+      
+      if (cutoffDate && cardDate < cutoffDate) {
+        show = false;
+      }
+    }
+    
+    card.style.display = show ? 'block' : 'none';
+  });
+}
+
+function loadPage(page) {
+  window.location.href = `/news?page=${page}`;
+}
+
+// Auto-apply filters on page load
+document.addEventListener('DOMContentLoaded', function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const category = urlParams.get('category');
+  const period = urlParams.get('period');
+  
+  if (category) {
+    document.getElementById('categoryFilter').value = category;
+  }
+  if (period) {
+    document.getElementById('periodFilter').value = period;
+  }
+  
+  if (category || period) {
+    applyFilters();
+  }
+});
+
+<% if (user && user.role === 'admin') { %>
+function showCreateNewsModal() {
+  document.getElementById('createNewsModal').style.display = 'flex';
+}
+
+function hideCreateNewsModal() {
+  document.getElementById('createNewsModal').style.display = 'none';
+  document.getElementById('createNewsForm').reset();
+}
+
+// Close modal on outside click
+document.getElementById('createNewsModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    hideCreateNewsModal();
+  }
+});
+<% } %>
+</script>
+<script src="/js/dropdown.js"></script>
+<script src="/js/theme-switcher.js"></script>
+</body>
+</html>

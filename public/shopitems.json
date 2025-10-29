@@ -1,0 +1,5 @@
+[
+  { "name": "Меч Огня", "price": 100, "image": "/images/sword.png" },
+  { "name": "Щит Тьмы", "price": 150, "image": "/images/shield.png" },
+  { "name": "Зелье Жизни", "price": 50, "image": "/images/potion.png" }
+]

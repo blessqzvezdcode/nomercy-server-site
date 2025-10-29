@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: nomercy-server
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - ./public/uploads:/app/public/uploads
+      - ./data:/app/data  # For JSON database files
+    depends_on:
+      - redis
+    networks:
+      - nomercy-network
+    healthcheck:
+      test: ["CMD", "node", "healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  redis:
+    image: redis:7-alpine
+    container_name: nomercy-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - nomercy-network
+    command: redis-server --appendonly yes
+
+  nginx:
+    image: nginx:alpine
+    container_name: nomercy-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./public:/var/www/static:ro
+    depends_on:
+      - app
+    networks:
+      - nomercy-network
+
+volumes:
+  redis_data:
+
+networks:
+  nomercy-network:
+    driver: bridge

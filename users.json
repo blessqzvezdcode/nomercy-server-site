@@ -1,0 +1,138 @@
+{
+  "user_demo": {
+    "id": "user_demo",
+    "name": "DemoUser",
+    "balance": 1000,
+    "ratings": [],
+    "inventory": [],
+    "avatar": null,
+    "history": {
+      "bought": [],
+      "sold": []
+    },
+    "role": "user"
+  },
+  "admin_demo": {
+    "id": "admin_demo",
+    "name": "DemoAdmin",
+    "balance": 10000,
+    "ratings": [],
+    "inventory": [],
+    "avatar": null,
+    "history": {
+      "bought": [],
+      "sold": []
+    },
+    "role": "admin"
+  },
+  "613717721867354122": {
+    "id": "613717721867354122",
+    "name": "blessqzvezd",
+    "email": "miceduck@gmail.com",
+    "avatar": "https://cdn.discordapp.com/avatars/613717721867354122/d033a8a1e09b02c2e6a9332b84023714.png",
+    "balance": 20044,
+    "ratings": [
+      5,
+      5,
+      5
+    ],
+    "inventory": [
+      {
+        "id": "c8",
+        "name": "Shadow Lord",
+        "rarity": "legendary",
+        "image": "",
+        "obtainedAt": 1761431045495
+      },
+      {
+        "id": "c2",
+        "name": "Mage Beta",
+        "rarity": "rare",
+        "image": "",
+        "obtainedAt": 1761431088095
+      },
+      {
+        "id": "c3",
+        "name": "Assassin Omega",
+        "rarity": "legendary",
+        "image": "",
+        "obtainedAt": 1761431088095
+      },
+      {
+        "id": "c10",
+        "name": "Ice Queen",
+        "rarity": "epic",
+        "image": "",
+        "obtainedAt": 1761575370066
+      },
+      {
+        "id": "c7",
+        "name": "Dragon Slayer",
+        "rarity": "epic",
+        "image": "",
+        "obtainedAt": 1761575370066
+      },
+      {
+        "id": "c4",
+        "name": "Knight Defender",
+        "rarity": "common",
+        "image": "",
+        "obtainedAt": 1761575370066
+      },
+      {
+        "id": "c5",
+        "name": "Archer Swift",
+        "rarity": "uncommon",
+        "image": "",
+        "obtainedAt": 1761575370066
+      },
+      {
+        "id": "c9",
+        "name": "Fire Mage",
+        "rarity": "common",
+        "image": "",
+        "obtainedAt": 1761575370066
+      },
+      {
+        "id": "c1",
+        "name": "Warrior Alpha",
+        "rarity": "common",
+        "image": "",
+        "obtainedAt": 1761575370066
+      },
+      {
+        "id": "c6",
+        "name": "Paladin Light",
+        "rarity": "rare",
+        "image": "",
+        "obtainedAt": 1761575370066
+      },
+      {
+        "id": "c4",
+        "name": "Knight Defender",
+        "rarity": "common",
+        "image": "",
+        "obtainedAt": 1761577221073
+      }
+    ],
+    "history": {
+      "bought": [],
+      "sold": []
+    },
+    "role": "admin",
+    "pityCounter": 22
+  },
+  "moderator_demo": {
+    "id": "moderator_demo",
+    "name": "DemoModerator",
+    "balance": 5000,
+    "ratings": [],
+    "inventory": [],
+    "avatar": null,
+    "history": {
+      "bought": [],
+      "sold": []
+    },
+    "role": "moderator"
+  }
+}

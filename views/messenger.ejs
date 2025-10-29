@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мессенджер - NoMercy</title>
+    <link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/messenger.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="nav-brand">NoMercy</a>
+        <div class="nav-buttons">
+            <button id="backBtn" class="btn">← Назад</button>
+            <button id="theme-toggle" class="btn ghost">🌙 Светлая тема</button>
+        </div>
+    </nav>
+
+    <div class="messenger-container">
+        <div class="messenger-header">
+            <h1>💬 Мессенджер</h1>
+            <p>Общайтесь с другими игроками</p>
+        </div>
+
+        <div class="messenger-layout">
+            <!-- Chat List -->
+            <div class="chat-list">
+                <div class="chat-list-header">
+                    <h3>Чаты</h3>
+                    <button class="btn btn-primary" onclick="showNewChatModal()">+ Новый чат</button>
+                </div>
+                <div id="chatsList" class="chats-list">
+                    <div class="loading">Загрузка чатов...</div>
+                </div>
+            </div>
+
+            <!-- Chat Window -->
+            <div class="chat-window">
+                <div class="chat-window-header" id="chatHeader" style="display: none;">
+                    <div class="chat-info">
+                        <img class="chat-avatar" id="chatAvatar" src="/images/default-avatar.png" alt="Avatar">
+                        <div class="chat-details">
+                            <h4 id="chatName">Выберите чат</h4>
+                            <span class="chat-status" id="chatStatus">Офлайн</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="messages-container" id="messagesContainer">
+                    <div class="no-chat-selected">
+                        <div class="no-chat-icon">💬</div>
+                        <h3>Выберите чат для начала общения</h3>
+                        <p>Выберите существующий чат или создайте новый</p>
+                    </div>
+                </div>
+
+                <div class="message-input-container" id="messageInputContainer" style="display: none;">
+                    <div class="message-actions">
+                        <button type="button" class="btn btn-secondary" onclick="showTransferModal()" title="Перевести монеты">
+                            💰 Перевод
+                        </button>
+                    </div>
+                    <form id="messageForm" class="message-form">
+                        <input type="text" id="messageInput" placeholder="Введите сообщение..." maxlength="500" required>
+                        <button type="submit" class="btn btn-primary">Отправить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Chat Modal -->
+    <div id="newChatModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💬 Новый чат</h2>
+                <button class="close-btn" onclick="hideNewChatModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="newChatForm">
+                    <div class="form-group">
+                        <label for="recipientSearch">Найти пользователя:</label>
+                        <input type="text" id="recipientSearch" placeholder="Введите имя пользователя" class="form-input">
+                        <div id="userSearchResults" class="search-results"></div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" onclick="hideNewChatModal()" class="btn btn-secondary">Отмена</button>
+                        <button type="submit" class="btn btn-primary" disabled id="createChatBtn">Создать чат</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Transfer Modal -->
+    <div id="transferModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💰 Перевод монет</h2>
+                <button class="close-btn" onclick="hideTransferModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="transferForm">
+                    <div class="form-group">
+                        <label for="transferAmount">Количество монет:</label>
+                        <input type="number" id="transferAmount" placeholder="Введите количество" class="form-input" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="transferMessage">Сообщение (необязательно):</label>
+                        <input type="text" id="transferMessage" placeholder="Комментарий к переводу" class="form-input" maxlength="100">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" onclick="hideTransferModal()" class="btn btn-secondary">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Перевести</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/theme-switcher.js"></script>
+    <script>
+        let currentChatId = null;
+        let selectedRecipient = null;
+        let messagesPolling = null;
+
+        document.getElementById('backBtn').addEventListener('click', () => {
+            history.back();
+        });
+
+        // Load chats on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadChats();
+            
+            // Check if we need to create/open a specific chat
+            const urlParams = new URLSearchParams(window.location.search);
+            const chatUserId = urlParams.get('chat');
+            if (chatUserId) {
+                createOrOpenChat(chatUserId);
+            }
+        });
+        
+        // Create or open chat with specific user
+        async function createOrOpenChat(userId) {
+            try {
+                const response = await fetch('/api/messenger/create-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        recipientId: userId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    await loadChats();
+                    selectChat(data.chatId);
+                    // Remove URL parameter
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                } else {
+                    console.error('Error creating/opening chat:', data.error);
+                }
+            } catch (error) {
+                console.error('Error creating/opening chat:', error);
+            }
+        }
+
+        // Load user chats
+        async function loadChats() {
+            try {
+                const response = await fetch('/api/messenger/chats');
+                const data = await response.json();
+                
+                const chatsList = document.getElementById('chatsList');
+                
+                if (data.success && data.chats.length > 0) {
+                    chatsList.innerHTML = data.chats.map(chat => `
+                        <div class="chat-item ${chat.hasUnread ? 'unread' : ''}" onclick="selectChat('${chat.id}')">
+                            <img class="chat-item-avatar" src="${chat.otherUser.avatar || '/images/default-avatar.png'}" alt="Avatar">
+                            <div class="chat-item-info">
+                                <div class="chat-item-name">${chat.otherUser.name}</div>
+                                <div class="chat-item-last-message">${chat.lastMessage || 'Нет сообщений'}</div>
+                            </div>
+                            <div class="chat-item-meta">
+                                ${chat.lastMessageTime ? `<span class="chat-time">${formatTime(chat.lastMessageTime)}</span>` : ''}
+                                ${chat.unreadCount > 0 ? `<span class="unread-badge">${chat.unreadCount}</span>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    chatsList.innerHTML = '<div class="empty-chats"><p>У вас пока нет чатов</p><button class="btn btn-primary" onclick="showNewChatModal()">Создать первый чат</button></div>';
+                }
+            } catch (error) {
+                console.error('Error loading chats:', error);
+                document.getElementById('chatsList').innerHTML = '<div class="error">Ошибка загрузки чатов</div>';
+            }
+        }
+
+        // Select chat
+        async function selectChat(chatId) {
+            currentChatId = chatId;
+            
+            // Update UI
+            document.getElementById('chatHeader').style.display = 'flex';
+            document.getElementById('messageInputContainer').style.display = 'flex';
+            document.querySelector('.no-chat-selected').style.display = 'none';
+            
+            // Load chat info and messages
+            await loadChatInfo(chatId);
+            await loadMessages(chatId);
+            
+            // Start polling for new messages
+            if (messagesPolling) clearInterval(messagesPolling);
+            messagesPolling = setInterval(() => loadMessages(chatId), 3000);
+        }
+
+        // Load chat info
+        async function loadChatInfo(chatId) {
+            try {
+                const response = await fetch(`/api/messenger/chat/${chatId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('chatName').textContent = data.chat.otherUser.name;
+                    document.getElementById('chatAvatar').src = data.chat.otherUser.avatar || '/images/default-avatar.png';
+                    document.getElementById('chatStatus').textContent = 'Онлайн'; // TODO: implement online status
+                }
+            } catch (error) {
+                console.error('Error loading chat info:', error);
+            }
+        }
+
+        // Load messages
+        async function loadMessages(chatId) {
+            try {
+                const response = await fetch(`/api/messenger/messages/${chatId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const container = document.getElementById('messagesContainer');
+                    container.innerHTML = data.messages.map(msg => `
+                        <div class="message ${msg.isOwn ? 'own' : 'other'}">
+                            <div class="message-content">
+                                <div class="message-text">${escapeHtml(msg.content)}</div>
+                                <div class="message-time">${formatTime(msg.createdAt)}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    // Scroll to bottom
+                    container.scrollTop = container.scrollHeight;
+                }
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        // Send message
+        document.getElementById('messageForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const messageInput = document.getElementById('messageInput');
+            const content = messageInput.value.trim();
+            
+            if (!content || !currentChatId) return;
+            
+            try {
+                const response = await fetch('/api/messenger/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        chatId: currentChatId,
+                        content: content
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    messageInput.value = '';
+                    await loadMessages(currentChatId);
+                    await loadChats(); // Update chat list
+                } else {
+                    alert('Ошибка отправки сообщения: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Ошибка отправки сообщения');
+            }
+        });
+
+        // New chat modal functions
+        function showNewChatModal() {
+            document.getElementById('newChatModal').style.display = 'flex';
+        }
+
+        function hideNewChatModal() {
+            document.getElementById('newChatModal').style.display = 'none';
+            document.getElementById('recipientSearch').value = '';
+            document.getElementById('userSearchResults').innerHTML = '';
+            selectedRecipient = null;
+            document.getElementById('createChatBtn').disabled = true;
+        }
+
+        // User search
+        let searchTimeout;
+        document.getElementById('recipientSearch').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+            
+            if (query.length < 2) {
+                document.getElementById('userSearchResults').innerHTML = '';
+                return;
+            }
+            
+            searchTimeout = setTimeout(() => searchUsers(query), 300);
+        });
+
+        async function searchUsers(query) {
+            try {
+                const response = await fetch(`/api/messenger/search-users?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                const results = document.getElementById('userSearchResults');
+                
+                if (data.success && data.users.length > 0) {
+                    results.innerHTML = data.users.map(user => `
+                        <div class="search-result-item" onclick="selectRecipient('${user.id}', '${user.name}', '${user.avatar || '/images/default-avatar.png'}')">
+                            <img class="search-avatar" src="${user.avatar || '/images/default-avatar.png'}" alt="Avatar">
+                            <span class="search-name">${user.name}</span>
+                        </div>
+                    `).join('');
+                } else {
+                    results.innerHTML = '<div class="no-results">Пользователи не найдены</div>';
+                }
+            } catch (error) {
+                console.error('Error searching users:', error);
+            }
+        }
+
+        function selectRecipient(userId, userName, userAvatar) {
+            selectedRecipient = { id: userId, name: userName, avatar: userAvatar };
+            document.getElementById('recipientSearch').value = userName;
+            document.getElementById('userSearchResults').innerHTML = '';
+            document.getElementById('createChatBtn').disabled = false;
+        }
+
+        // Create new chat
+        document.getElementById('newChatForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!selectedRecipient) return;
+            
+            try {
+                const response = await fetch('/api/messenger/create-chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        recipientId: selectedRecipient.id
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    hideNewChatModal();
+                    await loadChats();
+                    selectChat(data.chatId);
+                } else {
+                    alert('Ошибка создания чата: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error creating chat:', error);
+                alert('Ошибка создания чата');
+            }
+        });
+
+        // Transfer modal functions
+        function showTransferModal() {
+            if (!currentChatId) {
+                alert('Выберите чат для перевода монет');
+                return;
+            }
+            document.getElementById('transferModal').style.display = 'flex';
+        }
+
+        function hideTransferModal() {
+            document.getElementById('transferModal').style.display = 'none';
+            document.getElementById('transferForm').reset();
+        }
+
+        // Transfer coins
+        document.getElementById('transferForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!currentChatId) return;
+            
+            const amount = parseInt(document.getElementById('transferAmount').value);
+            const message = document.getElementById('transferMessage').value.trim();
+            
+            if (!amount || amount <= 0) {
+                alert('Введите корректное количество монет');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/messenger/transfer', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        chatId: currentChatId,
+                        amount: amount,
+                        message: message
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    hideTransferModal();
+                    await loadMessages(currentChatId);
+                    await loadChats(); // Update chat list
+                    alert(`Успешно переведено ${amount} монет!`);
+                } else {
+                    alert('Ошибка перевода: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error transferring coins:', error);
+                alert('Ошибка перевода монет');
+            }
+        });
+
+        // Utility functions
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            
+            if (diff < 60000) return 'только что';
+            if (diff < 3600000) return Math.floor(diff / 60000) + ' мин назад';
+            if (diff < 86400000) return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+            return date.toLocaleDateString('ru-RU');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Close modal on outside click
+        document.getElementById('newChatModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideNewChatModal();
+            }
+        });
+
+        document.getElementById('transferModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideTransferModal();
+            }
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (messagesPolling) clearInterval(messagesPolling);
+        });
+    </script>
+</body>
+</html>

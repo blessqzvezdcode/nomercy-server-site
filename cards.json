@@ -1,0 +1,72 @@
+[
+  {
+    "id": "c1",
+    "name": "Warrior Alpha",
+    "rarity": "common",
+    "image": "",
+    "created": 1620000000000
+  },
+  {
+    "id": "c2",
+    "name": "Mage Beta",
+    "rarity": "rare",
+    "image": "",
+    "created": 1620000001000
+  },
+  {
+    "id": "c3",
+    "name": "Assassin Omega",
+    "rarity": "legendary",
+    "image": "",
+    "created": 1620000002000
+  },
+  {
+    "id": "c4",
+    "name": "Knight Defender",
+    "rarity": "common",
+    "image": "",
+    "created": 1620000003000
+  },
+  {
+    "id": "c5",
+    "name": "Archer Swift",
+    "rarity": "uncommon",
+    "image": "",
+    "created": 1620000004000
+  },
+  {
+    "id": "c6",
+    "name": "Paladin Light",
+    "rarity": "rare",
+    "image": "",
+    "created": 1620000005000
+  },
+  {
+    "id": "c7",
+    "name": "Dragon Slayer",
+    "rarity": "epic",
+    "image": "",
+    "created": 1620000006000
+  },
+  {
+    "id": "c8",
+    "name": "Shadow Lord",
+    "rarity": "legendary",
+    "image": "",
+    "created": 1620000007000
+  },
+  {
+    "id": "c9",
+    "name": "Fire Mage",
+    "rarity": "common",
+    "image": "",
+    "created": 1620000008000
+  },
+  {
+    "id": "c10",
+    "name": "Ice Queen",
+    "rarity": "epic",
+    "image": "",
+    "created": 1620000009000
+  }
+]

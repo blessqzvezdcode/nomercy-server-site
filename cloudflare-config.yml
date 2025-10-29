@@ -1,0 +1,123 @@
+# Cloudflare Configuration для NoMercy Site
+
+# Настройки безопасности
+security:
+  # Уровень безопасности (off, essentially_off, low, medium, high, under_attack)
+  security_level: "medium"
+  
+  # Режим браузерной проверки (off, on, whitelist, blacklist)
+  browser_check: "on"
+  
+  # Блокировка по странам (опционально)
+  country_blocking:
+    enabled: false
+    blocked_countries: []
+    # - "CN"  # Китай
+    # - "RU"  # Россия
+  
+  # WAF правила
+  waf_rules:
+    - name: "Block SQL Injection"
+      expression: "(http.request.uri.query contains \"union select\") or (http.request.uri.query contains \"drop table\")"
+      action: "block"
+    
+    - name: "Block XSS Attempts"
+      expression: "(http.request.uri.query contains \"<script\") or (http.request.uri.query contains \"javascript:\")"
+      action: "block"
+    
+    - name: "Rate Limit API"
+      expression: "http.request.uri.path matches \"^/api/.*\""
+      action: "rate_limit"
+      rate_limit: "100/1m"
+
+# Настройки производительности
+performance:
+  # Кэширование
+  caching:
+    # Уровень кэширования (off, conservative, aggressive)
+    level: "aggressive"
+    
+    # Время жизни кэша для статических файлов
+    static_files_ttl: "1y"
+    
+    # Время жизни кэша для HTML
+    html_ttl: "4h"
+    
+    # Кэшировать всё
+    cache_everything: true
+  
+  # Минификация
+  minification:
+    html: true
+    css: true
+    js: true
+  
+  # Сжатие
+  compression:
+    brotli: true
+    gzip: true
+
+# SSL/TLS настройки
+ssl:
+  # Режим SSL (off, flexible, full, strict)
+  mode: "full"
+  
+  # Минимальная версия TLS
+  min_tls_version: "1.2"
+  
+  # HSTS
+  hsts:
+    enabled: true
+    max_age: 31536000
+    include_subdomains: true
+    preload: true
+
+# DNS настройки
+dns:
+  records:
+    - type: "A"
+      name: "nmercy.online"
+      content: "90.156.229.233"
+      proxied: true
+      ttl: 1  # Auto
+    
+    - type: "A"
+      name: "www"
+      content: "90.156.229.233"
+      proxied: true
+      ttl: 1  # Auto
+    
+    - type: "CNAME"
+      name: "api"
+      content: "nmercy.online"
+      proxied: true
+      ttl: 1  # Auto
+
+# Page Rules (правила страниц)
+page_rules:
+  - url: "nmercy.online/api/*"
+    settings:
+      cache_level: "bypass"
+      security_level: "high"
+  
+  - url: "nmercy.online/admin/*"
+    settings:
+      cache_level: "bypass"
+      security_level: "high"
+      browser_check: "on"
+  
+  - url: "nmercy.online/css/*"
+    settings:
+      cache_level: "cache_everything"
+      edge_cache_ttl: 2592000  # 30 days
+  
+  - url: "nmercy.online/js/*"
+    settings:
+      cache_level: "cache_everything"
+      edge_cache_ttl: 2592000  # 30 days
+  
+  - url: "nmercy.online/images/*"
+    settings:
+      cache_level: "cache_everything"
+      edge_cache_ttl: 7776000  # 90 days
+

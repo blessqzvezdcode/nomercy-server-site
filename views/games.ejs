@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Мини-Игры - NoMercy Marketplace</title>
+  <link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/games.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="brand">NoMercy</a>
+        <div class="nav-buttons">
+            <% if (user) { %>
+                <a href="/messenger" class="nav-messenger-btn" title="Мессенджер">💬</a>
+                <div class="dropdown">
+                    <button class="dropdown-toggle">
+                        <span>👤 <%= user.name %> (💰 <%= balance %>)</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/" class="dropdown-item">🏠 Главная</a>
+                        <a href="/profile/<%= user.id %>" class="dropdown-item">👤 Профиль</a>
+                        <a href="/market" class="dropdown-item">🛒 Маркет</a>
+                        <a href="/cards" class="dropdown-item">🃏 Карты</a>
+                        <a href="/quests" class="dropdown-item">⚔️ Квесты</a>
+                        <a href="/games" class="dropdown-item active">🎮 Игры</a>
+                        <a href="/news" class="dropdown-item">📰 Новости</a>
+                        <a href="/faq" class="dropdown-item">❓ FAQ</a>
+                        <a href="/achievements" class="dropdown-item">🏆 Достижения</a>
+                        <a href="/support" class="dropdown-item">🎧 Поддержка</a>
+                        <div class="dropdown-divider"></div>
+                        <% if (user.role === 'admin') { %>
+                            <a href="/admin" class="dropdown-item">⚙️ Админка</a>
+                            <div class="dropdown-divider"></div>
+                        <% } %>
+                        <button class="dropdown-item theme-toggle" id="theme-toggle">🌙 Светлая тема</button>
+                        <div class="dropdown-divider"></div>
+                        <a href="/logout" class="dropdown-item">🚪 Выйти</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <a href="/auth/discord" class="btn">Войти через Discord</a>
+            <% } %>
+        </div>
+    </nav>
+
+<div class="container">
+  <div class="games-header">
+    <h1>🎰 Мини-Игры</h1>
+    <p class="games-subtitle">Играйте в казино и выигрывайте NMCoin!</p>
+    <div class="balance-display">
+      <span class="balance-label">Ваш баланс:</span>
+      <span class="balance-amount neon-num"><%= balance %> NMCoin</span>
+    </div>
+  </div>
+
+  <!-- Game Selection -->
+  <div class="games-grid">
+    <!-- Number Game -->
+    <div class="game-card" onclick="openGame('number')">
+      <div class="game-icon">🎯</div>
+      <div class="game-info">
+        <h3>Больше или Меньше</h3>
+        <p>Угадайте, будет ли следующее число больше или меньше текущего</p>
+        <div class="game-stats">
+          <span class="stat">Коэффициент: 2x</span>
+          <span class="stat">Минимум: 10 NMCoin</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Crash Game -->
+    <div class="game-card" onclick="openGame('crash')">
+      <div class="game-icon">🚀</div>
+      <div class="game-info">
+        <h3>Краш</h3>
+        <p>Следите за ракетой и забирайте выигрыш до того, как она упадет</p>
+        <div class="game-stats">
+          <span class="stat">Максимум: 100x</span>
+          <span class="stat">Минимум: 10 NMCoin</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slots Game -->
+    <div class="game-card" onclick="openGame('slots')">
+      <div class="game-icon">🎰</div>
+      <div class="game-info">
+        <h3>Слоты</h3>
+        <p>Крутите барабаны и выигрывайте при совпадении символов</p>
+        <div class="game-stats">
+          <span class="stat">Максимум: 50x</span>
+          <span class="stat">Минимум: 5 NMCoin</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Modal -->
+  <div id="gameModal" class="game-modal">
+    <div class="game-modal-content">
+      <div class="game-modal-header">
+        <h2 id="gameTitle">Игра</h2>
+        <button class="close-btn" onclick="closeGame()">&times;</button>
+      </div>
+      
+      <div class="game-modal-body">
+        <!-- Number Game -->
+        <div id="numberGame" class="game-content" style="display: none;">
+          <div class="game-display">
+            <div class="current-number" id="currentNumber">?</div>
+            <div class="game-instructions">Угадайте, будет ли следующее число больше или меньше</div>
+          </div>
+          
+          <div class="bet-controls">
+            <div class="bet-input">
+              <label>Ставка (NMCoin)</label>
+              <input type="number" id="numberBet" min="10" max="1000" value="10">
+            </div>
+            <div class="bet-actions">
+              <button class="btn game-btn" onclick="makeNumberGuess('higher')">Больше</button>
+              <button class="btn game-btn" onclick="makeNumberGuess('lower')">Меньше</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Crash Game -->
+        <div id="crashGame" class="game-content" style="display: none;">
+          <div class="crash-display">
+            <div class="crash-multiplier" id="crashMultiplier">1.00x</div>
+            <div class="crash-graph" id="crashGraph"></div>
+          </div>
+          
+          <div class="bet-controls">
+            <div class="bet-input">
+              <label>Ставка (NMCoin)</label>
+              <input type="number" id="crashBet" min="10" max="1000" value="10">
+            </div>
+            <div class="bet-actions">
+              <button class="btn game-btn" id="crashStartBtn" onclick="startCrash()">Запустить</button>
+              <button class="btn game-btn" id="crashCashBtn" onclick="cashOut()" style="display: none;">Забрать</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slots Game -->
+        <div id="slotsGame" class="game-content" style="display: none;">
+          <div class="slots-display">
+            <div class="slots-reels">
+              <div class="reel" id="reel1">🍒</div>
+              <div class="reel" id="reel2">🍒</div>
+              <div class="reel" id="reel3">🍒</div>
+            </div>
+          </div>
+          
+          <div class="bet-controls">
+            <div class="bet-input">
+              <label>Ставка (NMCoin)</label>
+              <input type="number" id="slotsBet" min="5" max="500" value="5">
+            </div>
+            <div class="bet-actions">
+              <button class="btn game-btn" onclick="spinSlots()">Крутить</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game History -->
+  <div class="game-history">
+    <h3>📊 История игр</h3>
+    <div class="history-list" id="gameHistory">
+      <div class="empty-state">
+        <span class="empty-icon">🎮</span>
+        <p>Начните играть, чтобы увидеть историю</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentGame = null;
+let gameHistory = JSON.parse(localStorage.getItem('gameHistory') || '[]');
+
+function openGame(gameType) {
+  currentGame = gameType;
+  document.getElementById('gameModal').style.display = 'flex';
+  
+  // Hide all games
+  document.querySelectorAll('.game-content').forEach(game => game.style.display = 'none');
+  
+  // Show selected game
+  if (gameType === 'number') {
+    document.getElementById('numberGame').style.display = 'block';
+    document.getElementById('gameTitle').textContent = 'Больше или Меньше';
+    generateNewNumber();
+  } else if (gameType === 'crash') {
+    document.getElementById('crashGame').style.display = 'block';
+    document.getElementById('gameTitle').textContent = 'Краш';
+  } else if (gameType === 'slots') {
+    document.getElementById('slotsGame').style.display = 'block';
+    document.getElementById('gameTitle').textContent = 'Слоты';
+  }
+}
+
+function closeGame() {
+  document.getElementById('gameModal').style.display = 'none';
+  currentGame = null;
+}
+
+// Number Game Logic
+let currentNumber = 0;
+let nextNumber = 0;
+
+function generateNewNumber() {
+  currentNumber = Math.floor(Math.random() * 100) + 1;
+  nextNumber = Math.floor(Math.random() * 100) + 1;
+  document.getElementById('currentNumber').textContent = currentNumber;
+}
+
+function makeNumberGuess(guess) {
+  const bet = parseInt(document.getElementById('numberBet').value);
+  if (bet < 10) {
+    alert('Минимальная ставка: 10 NMCoin');
+    return;
+  }
+  
+  // Сначала списываем ставку
+  updateBalance(-bet);
+  
+  const isCorrect = (guess === 'higher' && nextNumber > currentNumber) || 
+                   (guess === 'lower' && nextNumber < currentNumber);
+  
+  if (isCorrect) {
+    const winAmount = bet * 2;
+    addToHistory('Больше или Меньше', bet, winAmount, true);
+    alert(`Правильно! Выигрыш: ${winAmount} NMCoin`);
+    // Начисляем выигрыш (ставка уже списана)
+    updateBalance(winAmount);
+  } else {
+    addToHistory('Больше или Меньше', bet, 0, false);
+    alert(`Неправильно! Следующее число было: ${nextNumber}`);
+    // Ставка уже списана при проигрыше
+  }
+  
+  generateNewNumber();
+}
+
+// Crash Game Logic
+let crashInterval = null;
+let crashMultiplier = 1.0;
+let isCrashRunning = false;
+
+function startCrash() {
+  if (isCrashRunning) return;
+  
+  const bet = parseInt(document.getElementById('crashBet').value);
+  if (bet < 10) {
+    alert('Минимальная ставка: 10 NMCoin');
+    return;
+  }
+  
+  // Сначала списываем ставку
+  updateBalance(-bet);
+  
+  isCrashRunning = true;
+  crashMultiplier = 1.0;
+  document.getElementById('crashStartBtn').style.display = 'none';
+  document.getElementById('crashCashBtn').style.display = 'inline-block';
+  
+  crashInterval = setInterval(() => {
+    crashMultiplier += 0.01;
+    document.getElementById('crashMultiplier').textContent = crashMultiplier.toFixed(2) + 'x';
+    
+    // Random crash point
+    if (Math.random() < 0.01) {
+      crash();
+    }
+  }, 100);
+}
+
+function cashOut() {
+  if (!isCrashRunning) return;
+  
+  const bet = parseInt(document.getElementById('crashBet').value);
+  const winAmount = Math.floor(bet * crashMultiplier);
+  
+  addToHistory('Краш', bet, winAmount, true);
+  alert(`Забрали! Выигрыш: ${winAmount} NMCoin`);
+  // Начисляем выигрыш (ставка уже списана)
+  updateBalance(winAmount);
+  
+  stopCrash();
+}
+
+function crash() {
+  if (!isCrashRunning) return;
+  
+  const bet = parseInt(document.getElementById('crashBet').value);
+  addToHistory('Краш', bet, 0, false);
+  alert(`Краш на ${crashMultiplier.toFixed(2)}x! Вы проиграли.`);
+  // Ставка уже списана при старте
+  
+  stopCrash();
+}
+
+function stopCrash() {
+  isCrashRunning = false;
+  clearInterval(crashInterval);
+  document.getElementById('crashStartBtn').style.display = 'inline-block';
+  document.getElementById('crashCashBtn').style.display = 'none';
+  document.getElementById('crashMultiplier').textContent = '1.00x';
+}
+
+// Slots Game Logic
+const slotSymbols = ['🍒', '🍋', '🍊', '🍇', '⭐', '💎'];
+let isSpinning = false;
+
+function spinSlots() {
+  if (isSpinning) return;
+  
+  const bet = parseInt(document.getElementById('slotsBet').value);
+  if (bet < 5) {
+    alert('Минимальная ставка: 5 NMCoin');
+    return;
+  }
+  
+  // Сначала списываем ставку
+  updateBalance(-bet);
+  
+  isSpinning = true;
+  const reels = document.querySelectorAll('.reel');
+  
+  // Spin animation
+  let spins = 0;
+  const spinInterval = setInterval(() => {
+    reels.forEach(reel => {
+      reel.textContent = slotSymbols[Math.floor(Math.random() * slotSymbols.length)];
+    });
+    spins++;
+    
+    if (spins > 20) {
+      clearInterval(spinInterval);
+      checkSlotsResult(bet);
+      isSpinning = false;
+    }
+  }, 100);
+}
+
+function checkSlotsResult(bet) {
+  const reels = document.querySelectorAll('.reel');
+  const symbols = Array.from(reels).map(reel => reel.textContent);
+  
+  let winAmount = 0;
+  let isWin = false;
+  
+  // Check for three of a kind
+  if (symbols[0] === symbols[1] && symbols[1] === symbols[2]) {
+    const multiplier = getSymbolMultiplier(symbols[0]);
+    winAmount = bet * multiplier;
+    isWin = true;
+  }
+  
+  addToHistory('Слоты', bet, winAmount, isWin);
+  
+  if (isWin) {
+    alert(`Выигрыш! ${winAmount} NMCoin`);
+    // Начисляем выигрыш (ставка уже списана)
+    updateBalance(winAmount);
+  } else {
+    alert('Попробуйте еще раз!');
+    // Ставка уже списана при старте
+  }
+}
+
+function getSymbolMultiplier(symbol) {
+  const multipliers = {
+    '🍒': 2,
+    '🍋': 3,
+    '🍊': 4,
+    '🍇': 5,
+    '⭐': 10,
+    '💎': 50
+  };
+  return multipliers[symbol] || 1;
+}
+
+// History Management
+function addToHistory(game, bet, win, isWin) {
+  const gameRecord = {
+    game: game,
+    bet: bet,
+    win: win,
+    isWin: isWin,
+    timestamp: new Date().toISOString()
+  };
+  
+  gameHistory.unshift(gameRecord);
+  if (gameHistory.length > 50) {
+    gameHistory = gameHistory.slice(0, 50);
+  }
+  
+  localStorage.setItem('gameHistory', JSON.stringify(gameHistory));
+  updateHistoryDisplay();
+}
+
+function updateHistoryDisplay() {
+  const historyContainer = document.getElementById('gameHistory');
+  
+  if (gameHistory.length === 0) {
+    historyContainer.innerHTML = `
+      <div class="empty-state">
+        <span class="empty-icon">🎮</span>
+        <p>Начните играть, чтобы увидеть историю</p>
+      </div>
+    `;
+    return;
+  }
+  
+  historyContainer.innerHTML = gameHistory.map(record => `
+    <div class="history-item ${record.isWin ? 'win' : 'loss'}">
+      <div class="history-game">${record.game}</div>
+      <div class="history-details">
+        <span>Ставка: ${record.bet} NMCoin</span>
+        <span>${record.isWin ? 'Выигрыш' : 'Проигрыш'}: ${record.win} NMCoin</span>
+      </div>
+      <div class="history-time">${new Date(record.timestamp).toLocaleString('ru-RU')}</div>
+    </div>
+  `).join('');
+}
+
+// Balance update function
+function updateBalance(amount) {
+  const balanceElement = document.querySelector('.balance-amount');
+  const currentBalance = parseInt(balanceElement.textContent);
+  const newBalance = currentBalance + amount;
+  balanceElement.textContent = newBalance;
+  
+  // Update balance on server
+  fetch('/games/update-balance', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ amount: amount })
+  }).then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        balanceElement.textContent = data.newBalance;
+      }
+    })
+    .catch(error => {
+      console.error('Error updating balance:', error);
+    });
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+  updateHistoryDisplay();
+});
+</script>
+<script src="/js/dropdown.js"></script>
+<script src="/js/theme-switcher.js"></script>
+</body>
+</html>

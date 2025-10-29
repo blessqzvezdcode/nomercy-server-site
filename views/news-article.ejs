@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= article.title %> - NoMercy Marketplace</title>
+  <link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/news.css">
+</head>
+<body>
+    <nav>
+  <a href="/" class="brand">NoMercy</a>
+  <div class="nav-buttons">
+    <% if (user) { %>
+      <div class="dropdown">
+        <button class="dropdown-toggle">
+          <span>Меню</span>
+        </button>
+        <div class="dropdown-menu">
+          <a href="/profile/<%= user.id %>" class="dropdown-item">👤 Профиль</a>
+          <a href="/market" class="dropdown-item">🛒 Маркет</a>
+          <a href="/cards" class="dropdown-item">🃏 Коллекция</a>
+          <a href="/news" class="dropdown-item active">📰 Новости</a>
+          <a href="/quests" class="dropdown-item">📋 Квесты</a>
+          <a href="/games" class="dropdown-item">🎰 Мини-Игры</a>
+          <a href="/achievements" class="dropdown-item">🏆 Достижения</a>
+          <a href="/faq" class="dropdown-item">❓ FAQ</a>
+          <div class="dropdown-divider"></div>
+          <a href="/logout" class="dropdown-item">🚪 Выйти</a>
+        </div>
+      </div>
+    <% } else { %>
+      <a href="/auth/discord" class="btn">Войти через Discord</a>
+    <% } %>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="article-header">
+    <div class="article-breadcrumb">
+      <a href="/news" class="breadcrumb-link">← Все новости</a>
+    </div>
+    
+    <div class="article-meta">
+      <span class="article-category category-<%= article.category %>"><%= article.categoryName %></span>
+      <span class="article-date"><%= new Date(article.date).toLocaleDateString('ru-RU') %></span>
+    </div>
+    
+    <h1 class="article-title"><%= article.title %></h1>
+    
+    <div class="article-author">
+      <span class="author-icon">👤</span>
+      <span class="author-name"><%= article.author %></span>
+    </div>
+  </div>
+
+  <div class="article-content">
+    <% if (article.image) { %>
+      <div class="article-image">
+        <img src="<%= article.image %>" alt="<%= article.title %>">
+      </div>
+    <% } %>
+    
+    <div class="article-text">
+      <%= article.content %>
+    </div>
+  </div>
+
+  <div class="article-actions">
+    <a href="/news" class="btn ghost">
+      <span class="btn-icon">📰</span>
+      Все новости
+    </a>
+  </div>
+</div>
+
+<script src="/js/ui-effects.js"></script>
+<script src="/js/dropdown.js"></script>
+</body>
+</html>

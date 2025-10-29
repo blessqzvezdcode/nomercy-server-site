@@ -1,0 +1,13 @@
+{
+  "i1": {
+    "id": "i1",
+    "name": "Red Sword",
+    "description": "Epic sword",
+    "price": 100,
+    "tags": [
+      "melee",
+      "epic"
+    ],
+    "history": []
+  }
+}

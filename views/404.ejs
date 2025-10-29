@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Страница не найдена | NoMercy</title>
+    <link rel="stylesheet" href="/css/base.css">
+</head>
+<body>
+        <nav>
+            <a href="/" class="brand">NoMercy</a>
+            <div class="nav-buttons">
+                <button id="backBtn" class="btn">← Назад</button>
+                <button id="theme-toggle" class="btn ghost">🌙 Светлая тема</button>
+            </div>
+        </nav>
+
+    <div class="container">
+        <div class="error-page">
+            <div class="error-code">404</div>
+            <div class="error-title">Страница не найдена</div>
+            <div class="error-message">
+                Извините, но запрашиваемая страница не существует или была перемещена.
+            </div>
+            <div class="error-actions">
+                <a href="/" class="btn btn-primary">🏠 На главную</a>
+                <a href="/market" class="btn btn-secondary">🛒 В маркет</a>
+                <button onclick="history.back()" class="btn btn-secondary">⬅️ Назад</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/theme-switcher.js"></script>
+    <script>
+        document.getElementById('backBtn').addEventListener('click', () => {
+            history.back();
+        });
+    </script>
+</body>
+</html>

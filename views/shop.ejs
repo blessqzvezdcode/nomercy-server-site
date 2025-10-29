@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Магазин - NoMercy</title>
+<link rel="stylesheet" href="/css/base.css">
+</head>
+<body>
+    <nav>
+  <a href="/" class="brand">NoMercy</a>
+  <div class="nav-buttons">
+  <% if (user) { %>
+    <div class="dropdown">
+      <button class="dropdown-toggle">
+        <span>Меню</span>
+      </button>
+      <div class="dropdown-menu">
+        <a href="/profile/<%= user.id %>" class="dropdown-item">👤 Профиль</a>
+        <a href="/market" class="dropdown-item">🛒 Маркет</a>
+        <a href="/cards" class="dropdown-item">🃏 Коллекция</a>
+        <a href="/news" class="dropdown-item">📰 Новости</a>
+        <a href="/quests" class="dropdown-item">📋 Квесты</a>
+        <a href="/games" class="dropdown-item">🎰 Мини-Игры</a>
+        <a href="/achievements" class="dropdown-item">🏆 Достижения</a>
+        <a href="/faq" class="dropdown-item">❓ FAQ</a>
+        <div class="dropdown-divider"></div>
+        <a href="/logout" class="dropdown-item">🚪 Выйти</a>
+      </div>
+    </div>
+  <% } else { %>
+    <a href="/auth/discord" class="btn">Войти через Discord</a>
+  <% } %>
+  </div>
+</nav>
+
+
+<div class="container">
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;"><a href="/market" class="btn">Маркетплейс</a><div class="small">Создавать лоты можно из инвентаря в этом магазине.</div></div>
+  <h2>Магазин внутриигровых предметов</h2>
+  <div id="shop-list" class="grid"></div>
+  <h3>Создать лот из инвентаря</h3>
+  <div id="sell-list" class="grid"></div>
+  <a href="/" class="btn ghost">Назад</a>
+</div>
+
+<script>
+async function loadShop() {
+  const res = await fetch('/shopitems.json');
+  const items = await res.json();
+  const container = document.getElementById('shop-list');
+  container.innerHTML = '';
+  items.forEach((it, idx) => {
+    const el = document.createElement('div');
+    el.className = 'shop-item card';
+    el.innerHTML = `<h4>${it.name}</h4><p>Цена: ${it.price} монет</p><div class="form-inline"><button class="btn" onclick="buy(${idx}, this)">Купить</button></div>`;
+    container.appendChild(el);
+  });
+  loadSellableInventory();
+}
+
+async function loadSellableInventory(){
+  const res = await fetch('/api/inventory');
+  const data = await res.json();
+  const sell = document.getElementById('sell-list');
+  sell.innerHTML = '';
+  data.inventory.forEach((it, idx)=>{
+    // allow selling non-card items
+    if (it.type !== 'card') {
+      const el = document.createElement('div');
+      el.className = 'shop-item card';
+      el.innerHTML = `<strong>${it.name}</strong><div class="small">Тип: ${it.type}</div><div class="form-inline"><input id="price_${idx}" placeholder="Цена" /><button class="btn ghost" onclick="createLot(${idx})">Создать лот</button></div>`;
+      sell.appendChild(el);
+    }
+  });
+}
+
+async function createLot(idx){
+  const price = parseInt(document.getElementById('price_'+idx).value || '0');
+  if (!price || price <= 0){ alert('Введите корректную цену'); return; }
+  const resp = await fetch('/api/market/list', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({inventoryIndex: idx, price})});
+  const data = await resp.json();
+  if (data.ok){ alert('Лот создан'); loadSellableInventory(); } else alert(data.error || 'Ошибка');
+}
+
+async function buy(idx, btn) {
+  btn.disabled = true;
+  const res = await fetch('/api/buy', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({index: idx})});
+  const data = await res.json();
+  if (data.ok) {
+    alert('Покупка успешна! Баланс: ' + data.balance);
+    document.getElementById('balance')?.textContent = data.balance;
+    loadSellableInventory();
+  } else {
+    alert(data.error || 'Ошибка');
+  }
+  btn.disabled = false;
+}
+window.addEventListener('DOMContentLoaded', loadShop);
+</script>
+<script src="/js/dropdown.js"></script>
+</body>
+</html>

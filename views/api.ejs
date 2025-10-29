@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>API Документация - NoMercy</title>
+    <link rel="stylesheet" href="/css/base.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="brand">NoMercy</a>
+        <div class="nav-buttons">
+            <% if (user) { %>
+                <div class="dropdown">
+                    <button class="dropdown-toggle">
+                        <span>👤 <%= user.name %> (💰 <%= balance %>)</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/profile/<%= user.id %>" class="dropdown-item">👤 Профиль</a>
+                        <a href="/market" class="dropdown-item">🛒 Маркет</a>
+                        <a href="/cards" class="dropdown-item">🃏 Карты</a>
+                        <a href="/collection" class="dropdown-item">📦 Коллекция</a>
+                        <a href="/quests" class="dropdown-item">⚔️ Квесты</a>
+                        <a href="/games" class="dropdown-item">🎮 Игры</a>
+                        <a href="/news" class="dropdown-item">📰 Новости</a>
+                        <a href="/faq" class="dropdown-item">❓ FAQ</a>
+                        <a href="/achievements" class="dropdown-item">🏆 Достижения</a>
+                        <a href="/support" class="dropdown-item">🎧 Поддержка</a>
+                        <div class="dropdown-divider"></div>
+                        <% if (user.role === 'admin') { %>
+                            <a href="/admin" class="dropdown-item">⚙️ Админка</a>
+                            <div class="dropdown-divider"></div>
+                        <% } %>
+                        <button class="dropdown-item theme-toggle" id="theme-toggle">🌙 Светлая тема</button>
+                        <div class="dropdown-divider"></div>
+                        <a href="/logout" class="dropdown-item">🚪 Выйти</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <a href="/auth/discord" class="btn">Войти через Discord</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>🔌 API Документация</h1>
+            <p>Документация по API NoMercy Marketplace</p>
+        </div>
+
+        <div class="api-content">
+            <div class="api-section">
+                <h2>🚀 Начало работы</h2>
+                <p>NoMercy API позволяет интегрировать функциональность маркетплейса в ваши приложения.</p>
+                <div class="code-block">
+                    <strong>Base URL:</strong> <code>https://nomercy.example.com/api</code>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <h2>🔐 Аутентификация</h2>
+                <p>Для доступа к API необходимо передавать токен авторизации в заголовке:</p>
+                <div class="code-block">
+                    <code>Authorization: Bearer YOUR_TOKEN</code>
+                </div>
+                <p>Получить токен можно в <a href="/profile">настройках профиля</a>.</p>
+            </div>
+
+            <div class="api-section">
+                <h2>📊 Маркетплейс</h2>
+                
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> /api/market/listings</h3>
+                    <p>Получить список всех активных лотов</p>
+                    <div class="code-block">
+                        <strong>Ответ:</strong>
+                        <pre>{
+  "success": true,
+  "listings": [
+    {
+      "id": "123",
+      "title": "Редкая карта",
+      "price": 1000,
+      "seller": "user123",
+      "createdAt": "2025-01-01T00:00:00Z"
+    }
+  ]
+}</pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <h3><span class="method post">POST</span> /api/market/list</h3>
+                    <p>Создать новый лот</p>
+                    <div class="code-block">
+                        <strong>Параметры:</strong>
+                        <pre>{
+  "title": "Название лота",
+  "description": "Описание",
+  "price": 1000,
+  "itemId": "item123"
+}</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <h2>👤 Пользователи</h2>
+                
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> /api/user/profile</h3>
+                    <p>Получить информацию о текущем пользователе</p>
+                    <div class="code-block">
+                        <strong>Ответ:</strong>
+                        <pre>{
+  "success": true,
+  "user": {
+    "id": "123",
+    "name": "Username",
+    "balance": 5000,
+    "level": 10
+  }
+}</pre>
+                    </div>
+                </div>
+
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> /api/user/inventory</h3>
+                    <p>Получить инвентарь пользователя</p>
+                    <div class="code-block">
+                        <strong>Ответ:</strong>
+                        <pre>{
+  "success": true,
+  "inventory": [
+    {
+      "id": "item123",
+      "name": "Карта героя",
+      "rarity": "legendary",
+      "quantity": 1
+    }
+  ]
+}</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <h2>🃏 Карты и предметы</h2>
+                
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> /api/cards</h3>
+                    <p>Получить список всех карт</p>
+                </div>
+
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> /api/cards/:id</h3>
+                    <p>Получить информацию о конкретной карте</p>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <h2>📈 Статистика</h2>
+                
+                <div class="endpoint">
+                    <h3><span class="method get">GET</span> /api/stats/market</h3>
+                    <p>Получить статистику маркетплейса</p>
+                    <div class="code-block">
+                        <strong>Ответ:</strong>
+                        <pre>{
+  "success": true,
+  "stats": {
+    "totalListings": 150,
+    "totalVolume": 50000,
+    "averagePrice": 333
+  }
+}</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="api-section">
+                <h2>❌ Коды ошибок</h2>
+                <table class="error-table">
+                    <tr>
+                        <th>Код</th>
+                        <th>Описание</th>
+                    </tr>
+                    <tr>
+                        <td>400</td>
+                        <td>Неверный запрос</td>
+                    </tr>
+                    <tr>
+                        <td>401</td>
+                        <td>Не авторизован</td>
+                    </tr>
+                    <tr>
+                        <td>403</td>
+                        <td>Доступ запрещен</td>
+                    </tr>
+                    <tr>
+                        <td>404</td>
+                        <td>Ресурс не найден</td>
+                    </tr>
+                    <tr>
+                        <td>429</td>
+                        <td>Слишком много запросов</td>
+                    </tr>
+                    <tr>
+                        <td>500</td>
+                        <td>Внутренняя ошибка сервера</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="api-section">
+                <h2>📝 Примеры использования</h2>
+                
+                <h3>JavaScript (Fetch API)</h3>
+                <div class="code-block">
+                    <pre>const response = await fetch('/api/market/listings', {
+  headers: {
+    'Authorization': 'Bearer YOUR_TOKEN',
+    'Content-Type': 'application/json'
+  }
+});
+
+const data = await response.json();
+console.log(data.listings);</pre>
+                </div>
+
+                <h3>Python (requests)</h3>
+                <div class="code-block">
+                    <pre>import requests
+
+headers = {
+    'Authorization': 'Bearer YOUR_TOKEN',
+    'Content-Type': 'application/json'
+}
+
+response = requests.get('https://nomercy.example.com/api/market/listings', headers=headers)
+data = response.json()
+print(data['listings'])</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/theme-switcher.js"></script>
+</body>
+</html>

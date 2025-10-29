@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Карточки - NoMercy</title>
+<link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/cards.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="brand">NoMercy</a>
+        <div class="nav-buttons">
+            <% if (user) { %>
+                <a href="/messenger" class="nav-messenger-btn" title="Мессенджер">💬</a>
+                <div class="dropdown">
+                    <button class="dropdown-toggle">
+                        <span>👤 <%= user.name %> (💰 <%= balance %>)</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/" class="dropdown-item">🏠 Главная</a>
+                        <a href="/profile/<%= user.id %>" class="dropdown-item">👤 Профиль</a>
+                        <a href="/market" class="dropdown-item">🛒 Маркет</a>
+                        <a href="/cards" class="dropdown-item active">🃏 Карты</a>
+                        <a href="/quests" class="dropdown-item">⚔️ Квесты</a>
+                        <a href="/games" class="dropdown-item">🎮 Игры</a>
+                        <a href="/news" class="dropdown-item">📰 Новости</a>
+                        <a href="/faq" class="dropdown-item">❓ FAQ</a>
+                        <a href="/achievements" class="dropdown-item">🏆 Достижения</a>
+                        <a href="/support" class="dropdown-item">🎧 Поддержка</a>
+                        <div class="dropdown-divider"></div>
+                        <% if (user.role === 'admin') { %>
+                            <a href="/admin" class="dropdown-item">⚙️ Админка</a>
+                            <div class="dropdown-divider"></div>
+                        <% } %>
+                        <button class="dropdown-item theme-toggle" id="theme-toggle">🌙 Светлая тема</button>
+                        <div class="dropdown-divider"></div>
+                        <a href="/logout" class="dropdown-item">🚪 Выйти</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <a href="/auth/discord" class="btn">Войти через Discord</a>
+            <% } %>
+        </div>
+    </nav>
+
+
+<div class="container">
+  <div class="cards-header">
+    <div class="cards-info">
+      <h1 class="cards-title">🃏 Коллекция карт</h1>
+      <p class="cards-subtitle">Открывай паки, собирай коллекции и торгуй картами</p>
+    </div>
+    <div class="balance-card">
+      <div class="balance-header">
+        <span class="balance-icon">💰</span>
+        <span class="balance-label">Ваш баланс</span>
+      </div>
+      <div class="balance-amount" id="balance"><%= balance %></div>
+      <div class="balance-currency">NMCoin</div>
+    </div>
+  </div>
+
+  <div class="cards-tabs">
+    <button class="tab-btn active" id="tab-gacha">🎰 Cards Gacha</button>
+    <button class="tab-btn" id="tab-collection">📚 Коллекция</button>
+    <button class="tab-btn" id="tab-collections">🏆 Коллекции</button>
+  </div>
+
+  <!-- Pity Counter Display -->
+  <div class="pity-display" style="margin-bottom:20px;">
+    <div class="pity-label">Счетчик жалости:</div>
+    <div class="pity-amount" id="pity-counter">0</div>
+    <div class="pity-info">/ 80 (гарантированная легендарная)</div>
+  </div>
+
+  <!-- Collection Section -->
+  <div id="collection-section" class="collection-section" style="display: none;">
+    <h2>📚 Моя коллекция</h2>
+    <div id="user-cards" class="cards-grid">
+      <!-- User's cards will be loaded here -->
+    </div>
+    <div id="empty-collection" class="empty-collection" style="display: none;">
+      <div class="empty-icon">📚</div>
+      <h3>Коллекция пуста</h3>
+      <p>Попробуйте Cards Gacha, чтобы получить карточки!</p>
+    </div>
+  </div>
+
+  <!-- Gacha Section -->
+  <div id="gacha-section" class="gacha-section">
+    <div class="gacha-header">
+      <h2>🎰 Cards Gacha</h2>
+      <p class="gacha-subtitle">Попробуйте удачу и получите редкие карточки!</p>
+      
+      <!-- Collection Selector -->
+      <div class="collection-selector">
+        <label for="collection-select">Выберите коллекцию:</label>
+        <select id="collection-select" onchange="changeCollection(this.value)">
+          <option value="all">Все карты</option>
+          <option value="launch_2025">Запуск 2025</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="gacha-machines">
+      <!-- Single Pull -->
+      <div class="gacha-machine">
+        <div class="machine-header">
+          <h3>🎯 Одиночная крутка</h3>
+          <div class="machine-price">50 NMCoin</div>
+        </div>
+        <div class="machine-description">
+          <p>Одна случайная карточка</p>
+          <div class="drop-rates">
+            <span class="rate">Common: 60%</span>
+            <span class="rate">Uncommon: 25%</span>
+            <span class="rate">Rare: 12%</span>
+            <span class="rate">Epic: 2.5%</span>
+            <span class="rate">Legendary: 0.5%</span>
+          </div>
+        </div>
+        <button class="gacha-btn single-pull" onclick="console.log('Button clicked!'); performGacha('single', this)">
+          <span class="btn-icon">🎯</span>
+          Одиночная крутка
+        </button>
+      </div>
+
+      <!-- 10 Pull -->
+      <div class="gacha-machine featured">
+        <div class="machine-header">
+          <h3>🔥 10 круток</h3>
+          <div class="machine-price">450 NMCoin</div>
+          <div class="discount-badge">-10%</div>
+        </div>
+        <div class="machine-description">
+          <p>10 карточек с гарантированной редкой</p>
+          <div class="drop-rates">
+            <span class="rate">Common: 50%</span>
+            <span class="rate">Uncommon: 30%</span>
+            <span class="rate">Rare: 15%</span>
+            <span class="rate">Epic: 4%</span>
+            <span class="rate">Legendary: 1%</span>
+          </div>
+        </div>
+        <button class="gacha-btn ten-pull" onclick="performGacha('ten', this)">
+          <span class="btn-icon">🔥</span>
+          10 круток
+        </button>
+      </div>
+
+      <!-- Legendary Pull -->
+      <div class="gacha-machine legendary">
+        <div class="machine-header">
+          <h3>👑 Легендарная крутка</h3>
+          <div class="machine-price">6000 NMCoin</div>
+        </div>
+        <div class="machine-description">
+          <p>Только легендарные карты!</p>
+          <div class="drop-rates">
+            <span class="rate legendary-rate">Legendary: 100%</span>
+          </div>
+        </div>
+        <button class="gacha-btn legendary-pull" onclick="performGacha('legendary', this)">
+          <span class="btn-icon">👑</span>
+          Легендарная крутка
+        </button>
+      </div>
+    </div>
+
+    <!-- Gacha Results -->
+    <div id="gacha-results" class="gacha-results" style="display: none;">
+      <div class="results-header">
+        <h3>🎉 Результаты круток!</h3>
+        <button class="close-results" onclick="closeGachaResults()">&times;</button>
+      </div>
+      <div id="gacha-cards" class="gacha-cards-grid"></div>
+    </div>
+  </div>
+
+
+  <div id="pack-modal">
+    <div id="pack-overlay" class="pack-overlay"></div>
+    <div class="pack-modal-content">
+      <div class="pack-modal-header">
+        <h3>🎁 Результаты открытия пака</h3>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="pack-results-container">
+        <div id="pack-results" class="pack-results-grid"></div>
+      </div>
+      <div class="pack-modal-footer">
+        <button class="btn" onclick="closeModal()">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Collections Section -->
+  <div id="collections-section" class="section" style="display:none;">
+    <div class="card">
+      <h3>🏆 Коллекции карт</h3>
+      <div id="collections-list">
+        <div class="loading">Загрузка коллекций...</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h3>🔍 Недостающие карты</h3>
+      <div id="missing-cards">
+        <div class="loading">Поиск недостающих карт...</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <h3>♻️ Переработка дубликатов</h3>
+      <div class="recycle-section">
+        <div class="recycle-info">
+          <p>Выберите карты для переработки в NMCoin:</p>
+          <div class="recycle-values">
+            <span class="value-item">Common: 10 NMCoin</span>
+            <span class="value-item">Uncommon: 15 NMCoin</span>
+            <span class="value-item">Rare: 25 NMCoin</span>
+            <span class="value-item">Epic: 50 NMCoin</span>
+            <span class="value-item">Legendary: 100 NMCoin</span>
+          </div>
+        </div>
+        <div id="duplicate-cards" class="duplicate-cards-grid">
+          <div class="loading">Поиск дубликатов...</div>
+        </div>
+        <div class="recycle-actions" style="display:none;">
+          <button id="recycle-all" class="btn recycle-all-btn">
+            ⚡ Переработать все дубликаты
+          </button>
+          <button id="recycle-selected" class="btn recycle-btn" disabled>
+            ♻️ Переработать выбранные
+          </button>
+          <div id="recycle-total" class="recycle-total">Итого: 0 NMCoin</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/packs.js"></script>
+
+</div>
+<script src="/js/ui-effects.js"></script>
+<script src="/js/dropdown.js"></script>
+<script src="/js/theme-switcher.js"></script>
+</body>
+</html>

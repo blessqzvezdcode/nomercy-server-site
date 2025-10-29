@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Поддержка - NoMercy</title>
+    <link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/support.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="brand">NoMercy</a>
+        <div class="nav-buttons">
+            <button id="backBtn" class="btn">← Назад</button>
+            <button id="theme-toggle" class="btn ghost">🌙 Светлая тема</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>🎧 Служба поддержки</h1>
+            <p>Мы готовы помочь вам решить любые вопросы</p>
+        </div>
+
+        <% if (user) { %>
+            <div class="support-form-container">
+                <h2>📝 Создать обращение</h2>
+                <form id="supportForm" class="support-form">
+                    <div class="form-group">
+                        <label for="subject">Тема обращения:</label>
+                        <select id="subject" name="subject" required>
+                            <option value="">Выберите тему</option>
+                            <option value="technical">🔧 Техническая проблема</option>
+                            <option value="payment">💰 Вопрос по платежам</option>
+                            <option value="trading">🛒 Проблема с торговлей</option>
+                            <option value="account">👤 Вопрос по аккаунту</option>
+                            <option value="ban">⚠️ Обжалование бана</option>
+                            <option value="bug">🐛 Сообщение об ошибке</option>
+                            <option value="suggestion">💡 Предложение</option>
+                            <option value="other">❓ Другое</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Описание проблемы:</label>
+                        <textarea id="message" name="message" rows="6" placeholder="Опишите вашу проблему подробно..." required></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">📤 Отправить обращение</button>
+                </form>
+            </div>
+
+            <div class="support-tickets" id="supportTickets">
+                <h2>📋 Мои обращения</h2>
+                <div id="ticketsList">
+                    <p class="loading">Загрузка обращений...</p>
+                </div>
+            </div>
+        <% } else { %>
+            <div class="auth-required">
+                <h2>🔐 Требуется авторизация</h2>
+                <p>Для создания обращения в службу поддержки необходимо войти в систему.</p>
+                <a href="/auth/discord" class="btn btn-primary">💬 Войти через Discord</a>
+            </div>
+        <% } %>
+
+        <div class="support-info">
+            <h2>ℹ️ Полезная информация</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <h3>⏱️ Время ответа</h3>
+                    <p>Обычно мы отвечаем в течение 24 часов. Срочные вопросы рассматриваются быстрее.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h3>📚 База знаний</h3>
+                    <p>Перед созданием обращения проверьте <a href="/faq">раздел FAQ</a> - возможно, ответ уже есть там.</p>
+                </div>
+                
+                <div class="info-card">
+                    <h3>🔍 Детали проблемы</h3>
+                    <p>Чем подробнее вы опишете проблему, тем быстрее мы сможем вам помочь.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/theme-switcher.js"></script>
+    <script>
+        document.getElementById('backBtn').addEventListener('click', () => {
+            history.back();
+        });
+    </script>
+    <% if (user) { %>
+    <script>
+        document.getElementById('supportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                subject: formData.get('subject'),
+                message: formData.get('message')
+            };
+            
+            try {
+                const response = await fetch('/api/support/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Обращение успешно создано! Мы свяжемся с вами в ближайшее время.');
+                    e.target.reset();
+                    loadTickets();
+                } else {
+                    alert('❌ Ошибка при создании обращения: ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ Произошла ошибка при отправке обращения');
+                console.error('Error:', error);
+            }
+        });
+        
+        async function loadTickets() {
+            try {
+                const response = await fetch('/api/support/tickets');
+                const result = await response.json();
+                
+                const ticketsList = document.getElementById('ticketsList');
+                
+                if (result.success && result.tickets.length > 0) {
+                    ticketsList.innerHTML = result.tickets.map(ticket => `
+                        <div class="ticket-item ${ticket.status}">
+                            <div class="ticket-header">
+                                <span class="ticket-id">#${ticket.id}</span>
+                                <span class="ticket-subject">${getSubjectIcon(ticket.subject)} ${getSubjectName(ticket.subject)}</span>
+                                <span class="ticket-status status-${ticket.status}">${getStatusName(ticket.status)}</span>
+                            </div>
+                            <div class="ticket-message">${ticket.message.substring(0, 100)}${ticket.message.length > 100 ? '...' : ''}</div>
+                            <div class="ticket-date">Создано: ${new Date(ticket.createdAt).toLocaleString('ru-RU')}</div>
+                            ${ticket.response ? `<div class="ticket-response"><strong>Ответ:</strong> ${ticket.response}</div>` : ''}
+                        </div>
+                    `).join('');
+                } else {
+                    ticketsList.innerHTML = '<p class="no-tickets">У вас пока нет обращений</p>';
+                }
+            } catch (error) {
+                document.getElementById('ticketsList').innerHTML = '<p class="error">Ошибка загрузки обращений</p>';
+                console.error('Error loading tickets:', error);
+            }
+        }
+        
+        function getSubjectIcon(subject) {
+            const icons = {
+                'technical': '🔧',
+                'payment': '💰',
+                'trading': '🛒',
+                'account': '👤',
+                'ban': '⚠️',
+                'bug': '🐛',
+                'suggestion': '💡',
+                'other': '❓'
+            };
+            return icons[subject] || '❓';
+        }
+        
+        function getSubjectName(subject) {
+            const names = {
+                'technical': 'Техническая проблема',
+                'payment': 'Вопрос по платежам',
+                'trading': 'Проблема с торговлей',
+                'account': 'Вопрос по аккаунту',
+                'ban': 'Обжалование бана',
+                'bug': 'Сообщение об ошибке',
+                'suggestion': 'Предложение',
+                'other': 'Другое'
+            };
+            return names[subject] || 'Неизвестно';
+        }
+        
+        function getStatusName(status) {
+            const names = {
+                'open': 'Открыто',
+                'in_progress': 'В работе',
+                'closed': 'Закрыто'
+            };
+            return names[status] || status;
+        }
+        
+        // Загрузить обращения при загрузке страницы
+        loadTickets();
+    </script>
+    <% } %>
+</body>
+</html>

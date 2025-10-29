@@ -1,0 +1,25 @@
+<header style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:#0b0b0b;color:#fff;">
+  <div class="left" style="display:flex;align-items:center;gap:12px;">
+    <a href="/" style="color:#fff;text-decoration:none;font-weight:bold;">NoMercy Marketplace</a>
+  </div>
+  <nav style="flex:1; text-align:center;">
+    <% if (typeof user !== 'undefined' && user) { %>
+      <a href="/profile" style="margin:0 8px;">Профиль</a>
+      <a href="/market" style="margin:0 8px;">Маркет</a>
+      <a href="/collection" style="margin:0 8px;">Коллекция</a>
+    <% } else { %>
+      <a href="/market" style="margin:0 8px;">Маркет</a>
+    <% } %>
+  </nav>
+  <div class="auth-right" style="min-width:160px;text-align:right;">
+    <% if (typeof user !== 'undefined' && user) { %>
+      <span style="margin-right:10px;">Привет, <strong><%= user.name %></strong></span>
+      <a href='/logout' style="background:#6b46c1;color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none;">Выйти</a>
+    <% } else { %>
+      <a href='/auth/discord' style="background:#4c51bf;color:#fff;padding:8px 12px;border-radius:8px;text-decoration:none;">Войти через Discord</a>
+    <% } %>
+  </div>
+</header>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/public/js/socket.js"></script>
+<script src="/public/js/main.js"></script>

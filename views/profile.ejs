@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Профиль - NoMercy</title>
+    <link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/profile.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="brand">NoMercy</a>
+        <div class="nav-buttons">
+            <% if (user) { %>
+                <a href="/messenger" class="nav-messenger-btn" title="Мессенджер">💬</a>
+                <div class="dropdown">
+                    <button class="dropdown-toggle">
+                        <span>👤 <%= user.name %> (💰 <%= balance %>)</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/" class="dropdown-item">🏠 Главная</a>
+                        <a href="/profile/<%= user.id %>" class="dropdown-item active">👤 Профиль</a>
+                        <a href="/market" class="dropdown-item">🛒 Маркет</a>
+                        <a href="/cards" class="dropdown-item">🃏 Карты</a>
+                        <a href="/quests" class="dropdown-item">⚔️ Квесты</a>
+                        <a href="/games" class="dropdown-item">🎮 Игры</a>
+                        <a href="/news" class="dropdown-item">📰 Новости</a>
+                        <a href="/faq" class="dropdown-item">❓ FAQ</a>
+                        <a href="/achievements" class="dropdown-item">🏆 Достижения</a>
+                        <a href="/support" class="dropdown-item">🎧 Поддержка</a>
+                        <div class="dropdown-divider"></div>
+                        <% if (user.role === 'admin') { %>
+                            <a href="/admin" class="dropdown-item">⚙️ Админка</a>
+                            <div class="dropdown-divider"></div>
+                        <% } %>
+                        <button class="dropdown-item theme-toggle" id="theme-toggle">🌙 Светлая тема</button>
+                        <div class="dropdown-divider"></div>
+                        <a href="/logout" class="dropdown-item">🚪 Выйти</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <a href="/auth/discord" class="btn">Войти через Discord</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="profile-simple">
+            <div class="profile-avatar">
+                <% if (person.avatar) { %>
+                    <img src="<%= person.avatar %>" alt="<%= person.name %>">
+                <% } else { %>
+                    <div class="no-avatar">👤</div>
+                <% } %>
+            </div>
+            <div class="profile-info">
+                <h1 class="profile-name">
+                    <%= person.name %>
+                    <% if (person.role === 'admin') { %>
+                        <span class="admin-badge">👑 Администратор</span>
+                    <% } %>
+                </h1>
+                <div class="profile-details">
+                    <div class="detail-item">
+                        <span class="detail-label">ID:</span>
+                        <span class="detail-value"><%= person.id %></span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Баланс:</span>
+                        <span class="detail-value"><%= person.balance %> NMCoin</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Рейтинг:</span>
+                        <span class="detail-value"><%= avg ? avg.toFixed(2) : '—' %> ⭐</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="profile-sections">
+            <div class="section">
+                <h3>🛒 История покупок</h3>
+                <% if (person.history && person.history.bought && person.history.bought.length) { %>
+                    <div class="history-list">
+                        <% person.history.bought.forEach(function(it){ %>
+                            <div class="history-item">
+                                <div class="history-info">
+                                    <div class="history-title"><%= it.title %></div>
+                                    <div class="history-meta">от: <%= it.from %></div>
+                                </div>
+                                <div class="history-price"><%= it.price %> NMCoin</div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state">
+                        <span class="empty-icon">📦</span>
+                        <p>Нет покупок</p>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="section">
+                <h3>💰 История продаж</h3>
+                <% if (person.history && person.history.sold && person.history.sold.length) { %>
+                    <div class="history-list">
+                        <% person.history.sold.forEach(function(it){ %>
+                            <div class="history-item">
+                                <div class="history-info">
+                                    <div class="history-title"><%= it.title %></div>
+                                    <div class="history-meta">покупатель: <%= it.buyer %></div>
+                                </div>
+                                <div class="history-price"><%= it.price %> NMCoin</div>
+                            </div>
+                        <% }) %>
+                    </div>
+                <% } else { %>
+                    <div class="empty-state">
+                        <span class="empty-icon">💰</span>
+                        <p>Нет продаж</p>
+                    </div>
+                <% } %>
+            </div>
+
+            <div class="section">
+                <h3>🏪 Мои лоты</h3>
+                <div id="user-listings">
+                    <div class="loading">Загрузка...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Load user listings
+    async function loadUserListings() {
+        try {
+            const response = await fetch('/api/market/listings');
+            const data = await response.json();
+            
+            if (data.success) {
+                const userListingsDiv = document.getElementById('user-listings');
+                const currentUserId = '<%= person.id %>';
+                
+                // Filter listings by current user
+                const userListings = data.listings.filter(listing => listing.owner === currentUserId);
+                
+                if (userListings.length > 0) {
+                    userListingsDiv.innerHTML = '';
+                    userListings.forEach(listing => {
+                        const listingElement = document.createElement('div');
+                        listingElement.className = 'listing-item';
+                        listingElement.innerHTML = `
+                            <div class="listing-info">
+                                <h4>${listing.title}</h4>
+                                <p>${listing.description}</p>
+                                <div class="listing-meta">
+                                    <span class="listing-price">${listing.price} NMCoin</span>
+                                    <span class="listing-type">${listing.type === 'auction' ? 'Аукцион' : 'Прямая продажа'}</span>
+                                    <span class="listing-status status-${listing.status}">${getStatusText(listing.status)}</span>
+                                </div>
+                            </div>
+                            <div class="listing-actions">
+                                ${listing.status === 'active' ? `
+                                    <button class="btn delete-listing-btn" onclick="deleteListing('${listing.id}')">
+                                        🗑️ Удалить
+                                    </button>
+                                ` : ''}
+                            </div>
+                        `;
+                        userListingsDiv.appendChild(listingElement);
+                    });
+                } else {
+                    userListingsDiv.innerHTML = '<div class="empty-state"><span class="empty-icon">📦</span><p>Нет активных лотов</p></div>';
+                }
+            } else {
+                document.getElementById('user-listings').innerHTML = 
+                    '<div class="error">Ошибка загрузки лотов</div>';
+            }
+        } catch (error) {
+            console.error('Error loading user listings:', error);
+            document.getElementById('user-listings').innerHTML = 
+                '<div class="error">Ошибка загрузки лотов</div>';
+        }
+    }
+
+    function getStatusText(status) {
+        const statusMap = {
+            'active': 'Активен',
+            'sold': 'Продан',
+            'closed': 'Закрыт',
+            'pending': 'Ожидает'
+        };
+        return statusMap[status] || status;
+    }
+
+    async function deleteListing(listingId) {
+        if (!confirm('Удалить этот лот?')) return;
+        
+        try {
+            const response = await fetch(`/api/market/delete/${listingId}`, {
+                method: 'DELETE'
+            });
+            
+            if (response.ok) {
+                loadUserListings();
+            } else {
+                alert('Ошибка при удалении лота');
+            }
+        } catch (error) {
+            console.error('Error deleting listing:', error);
+            alert('Ошибка при удалении лота: ' + error.message);
+        }
+    }
+
+    // Load listings on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        loadUserListings();
+    });
+    </script>
+    <script src="/js/dropdown.js"></script>
+    <script src="/js/theme-switcher.js"></script>
+</body>
+</html>

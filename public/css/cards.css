@@ -1,0 +1,687 @@
+/* Cards Page Styles */
+
+/* Cards Header */
+.cards-header {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  margin-bottom: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+}
+
+.cards-info {
+  flex: 1;
+}
+
+.cards-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  background: var(--gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cards-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+/* Cards Tabs */
+.cards-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  background: var(--panel);
+  padding: 4px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 12px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  flex: 1;
+  text-align: center;
+}
+
+.tab-btn.active {
+  background: var(--gradient);
+  color: white;
+  box-shadow: var(--shadow);
+}
+
+.tab-btn:hover:not(.active) {
+  background: var(--panel-hover);
+  color: var(--text);
+}
+
+/* Pity Counter */
+.pity-display {
+  background: linear-gradient(135deg, #2d1b69, #1a0d3a);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.pity-display::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(192, 132, 252, 0.1) 50%, transparent 70%);
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.pity-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 8px;
+}
+
+.pity-amount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--neon);
+  text-shadow: 0 0 10px var(--neon-glow);
+  margin-bottom: 4px;
+}
+
+.pity-info {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Gacha Section */
+.gacha-section {
+  margin: 20px 0;
+}
+
+.gacha-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.gacha-header h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.gacha-subtitle {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.collection-selector {
+  margin: 20px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.collection-selector label {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.collection-selector select {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  min-width: 150px;
+}
+
+/* Gacha Machines */
+.gacha-machines {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.gacha-machine {
+  background: var(--gradient-dark);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.gacha-machine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gradient);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.gacha-machine:hover::before {
+  transform: scaleX(1);
+}
+
+.gacha-machine:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-hover);
+}
+
+.gacha-machine.featured {
+  border: 2px solid var(--accent);
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(59, 130, 246, 0.1));
+}
+
+.gacha-machine.legendary {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 2px solid #ffd700;
+}
+
+.machine-header {
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.machine-header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.machine-price {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--neon);
+  text-shadow: 0 0 10px var(--neon-glow);
+}
+
+.discount-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #22c55e, #10b981);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.machine-description {
+  margin-bottom: 20px;
+}
+
+.machine-description p {
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.drop-rates {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rate {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  padding: 2px 0;
+}
+
+.rate.legendary-rate {
+  color: #ffd700;
+  font-weight: 600;
+}
+
+.gacha-btn {
+  background: var(--gradient);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.gacha-btn:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.gacha-btn.legendary-pull {
+  background: linear-gradient(135deg, #ffd700, #ffed4e);
+  color: #1a1a2e;
+}
+
+.gacha-btn.legendary-pull:hover {
+  background: linear-gradient(135deg, #ffed4e, #fbbf24);
+}
+
+/* Gacha Results */
+.gacha-results {
+  background: var(--gradient-dark);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin-top: 24px;
+  position: relative;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.results-header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text);
+}
+
+.close-results {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.close-results:hover {
+  background: var(--panel-hover);
+  color: var(--text);
+}
+
+.gacha-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+}
+
+/* Collection Section */
+.collection-section {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  margin: 20px 0;
+}
+
+.collection-section h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.empty-collection {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-secondary);
+}
+
+.empty-collection .empty-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  display: block;
+}
+
+/* Collections Section */
+.section {
+  margin: 20px 0;
+}
+
+.collections-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.collection-item {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.collection-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-hover);
+}
+
+/* Missing Cards */
+.missing-section {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  margin: 20px 0;
+}
+
+/* Recycle Section */
+.recycle-section {
+  margin-top: 16px;
+}
+
+.recycle-info {
+  margin-bottom: 20px;
+}
+
+.recycle-info p {
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.recycle-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.value-item {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.duplicate-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.recycle-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.recycle-all-btn {
+  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.recycle-all-btn:hover {
+  background: linear-gradient(135deg, #f7931e, #ff8c00);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.recycle-btn {
+  background: var(--gradient);
+  border: none;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.recycle-btn:disabled {
+  background: var(--panel);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.recycle-total {
+  color: var(--neon);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* Pack Modal */
+#pack-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2000;
+  display: none;
+}
+
+.pack-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(5px);
+}
+
+.pack-modal-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--gradient-dark);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+
+.pack-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+
+.pack-modal-header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  background: var(--panel-hover);
+  color: var(--text);
+}
+
+.pack-results-container {
+  padding: 24px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.pack-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 16px;
+}
+
+.pack-modal-footer {
+  padding: 20px 24px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+/* Card Result Styles */
+.card-result {
+  background: var(--gradient-dark);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.card-result:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--border-hover);
+}
+
+.card-result.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+.card-result.glow-effect {
+  box-shadow: 0 0 30px rgba(192, 132, 252, 0.5);
+  border-color: var(--neon);
+}
+
+.rarity {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: inline-block;
+}
+
+.rarity.common {
+  background: rgba(156, 163, 175, 0.2);
+  color: #9ca3af;
+}
+
+.rarity.uncommon {
+  background: rgba(34, 197, 94, 0.2);
+  color: #10b981;
+}
+
+.rarity.rare {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.rarity.epic {
+  background: rgba(168, 85, 247, 0.2);
+  color: #a855f7;
+}
+
+.rarity.legendary {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+}
+
+/* Animations */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes shimmer {
+  0%, 100% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .cards-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .cards-tabs {
+    flex-direction: column;
+  }
+  
+  .gacha-machines {
+    grid-template-columns: 1fr;
+  }
+  
+  .cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .pack-modal-content {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+  
+  .pack-results-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+  
+  .recycle-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

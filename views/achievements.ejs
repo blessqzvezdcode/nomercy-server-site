@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Достижения - NoMercy</title>
+    <link rel="stylesheet" href="/css/base.css">
+<link rel="stylesheet" href="/css/achievements.css">
+</head>
+<body>
+    <nav>
+        <a href="/" class="brand">NoMercy</a>
+        <div class="nav-buttons">
+            <% if (user) { %>
+                <a href="/messenger" class="nav-messenger-btn" title="Мессенджер">💬</a>
+                <div class="dropdown">
+                    <button class="dropdown-toggle">
+                        <span>👤 <%= user.name %> (💰 <%= balance %>)</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a href="/" class="dropdown-item">🏠 Главная</a>
+                        <a href="/profile/<%= user.id %>" class="dropdown-item">👤 Профиль</a>
+                        <a href="/market" class="dropdown-item">🛒 Маркет</a>
+                        <a href="/cards" class="dropdown-item">🃏 Карты</a>
+                        <a href="/quests" class="dropdown-item">⚔️ Квесты</a>
+                        <a href="/games" class="dropdown-item">🎮 Игры</a>
+                        <a href="/news" class="dropdown-item">📰 Новости</a>
+                        <a href="/faq" class="dropdown-item">❓ FAQ</a>
+                        <a href="/achievements" class="dropdown-item active">🏆 Достижения</a>
+                        <a href="/support" class="dropdown-item">🎧 Поддержка</a>
+                        <div class="dropdown-divider"></div>
+                        <% if (user.role === 'admin') { %>
+                            <a href="/admin" class="dropdown-item">⚙️ Админка</a>
+                            <div class="dropdown-divider"></div>
+                        <% } %>
+                        <button class="dropdown-item theme-toggle" id="theme-toggle">🌙 Светлая тема</button>
+                        <div class="dropdown-divider"></div>
+                        <a href="/logout" class="dropdown-item">🚪 Выйти</a>
+                    </div>
+                </div>
+            <% } else { %>
+                <a href="/auth/discord" class="btn">Войти через Discord</a>
+            <% } %>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="achievements-header">
+            <h1>🏆 Достижения и Уровни</h1>
+            <p>Зарабатывайте XP за активность и получайте новые звания!</p>
+        </div>
+
+        <!-- Current Level Display -->
+        <div class="level-card" style="background: linear-gradient(135deg, <%= levelData.color %>, <%= levelData.color %>88);">
+            <div class="level-info">
+                <div class="level-badge">
+                    <span class="level-number"><%= levelData.level %></span>
+                </div>
+                <div class="level-details">
+                    <h2 class="level-title" style="color: <%= levelData.color %>;"><%= levelData.title %></h2>
+                    <div class="xp-bar">
+                        <div class="xp-progress" style="width: <%= Math.min(100, ((user.xp || 0) % 1000) / 10) %>%"></div>
+                        <span class="xp-text"><%= user.xp || 0 %> XP</span>
+                    </div>
+                </div>
+            </div>
+            <div class="level-frame <%= levelData.frame %>"></div>
+        </div>
+
+        <!-- XP Sources -->
+        <div class="xp-sources">
+            <h3>💡 Как получить XP:</h3>
+            <div class="xp-grid">
+                <div class="xp-item">
+                    <span class="xp-icon">🛒</span>
+                    <div class="xp-details">
+                        <h4>Покупка в маркете</h4>
+                        <p>+10 XP за каждую покупку</p>
+                    </div>
+                </div>
+                <div class="xp-item">
+                    <span class="xp-icon">💰</span>
+                    <div class="xp-details">
+                        <h4>Продажа в маркете</h4>
+                        <p>+15 XP за каждую продажу</p>
+                    </div>
+                </div>
+                <div class="xp-item">
+                    <span class="xp-icon">🎰</span>
+                    <div class="xp-details">
+                        <h4>Гача крутки</h4>
+                        <p>+5 XP за 1 крутку, +20 XP за 10 круток</p>
+                    </div>
+                </div>
+                <div class="xp-item">
+                    <span class="xp-icon">📝</span>
+                    <div class="xp-details">
+                        <h4>Отзывы</h4>
+                        <p>+5 XP за каждый отзыв</p>
+                    </div>
+                </div>
+                <div class="xp-item">
+                    <span class="xp-icon">📦</span>
+                    <div class="xp-details">
+                        <h4>Создание лотов</h4>
+                        <p>+8 XP за каждый лот</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level Progression -->
+        <div class="level-progression">
+            <h3>📈 Прогресс уровней:</h3>
+            <div class="levels-grid">
+                <div class="level-item <%= levelData.level >= 1 ? 'unlocked' : '' %>">
+                    <div class="level-icon">🥉</div>
+                    <div class="level-info">
+                        <h4>Новичок</h4>
+                        <p>0-99 XP</p>
+                    </div>
+                </div>
+                <div class="level-item <%= levelData.level >= 2 ? 'unlocked' : '' %>">
+                    <div class="level-icon">🥈</div>
+                    <div class="level-info">
+                        <h4>Торговец</h4>
+                        <p>100-499 XP</p>
+                    </div>
+                </div>
+                <div class="level-item <%= levelData.level >= 3 ? 'unlocked' : '' %>">
+                    <div class="level-icon">🥇</div>
+                    <div class="level-info">
+                        <h4>Опытный</h4>
+                        <p>500-1499 XP</p>
+                    </div>
+                </div>
+                <div class="level-item <%= levelData.level >= 4 ? 'unlocked' : '' %>">
+                    <div class="level-icon">💎</div>
+                    <div class="level-info">
+                        <h4>Эксперт</h4>
+                        <p>1500-2999 XP</p>
+                    </div>
+                </div>
+                <div class="level-item <%= levelData.level >= 5 ? 'unlocked' : '' %>">
+                    <div class="level-icon">👑</div>
+                    <div class="level-info">
+                        <h4>Мастер</h4>
+                        <p>3000-4999 XP</p>
+                    </div>
+                </div>
+                <div class="level-item <%= levelData.level >= 6 ? 'unlocked' : '' %>">
+                    <div class="level-icon">🔥</div>
+                    <div class="level-info">
+                        <h4>Легенда рынка</h4>
+                        <p>5000+ XP</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Achievements -->
+        <% if (user.achievements && user.achievements.length > 0) { %>
+        <div class="recent-achievements">
+            <h3>🏅 Последние достижения:</h3>
+            <div class="achievements-list">
+                <% user.achievements.slice(-5).reverse().forEach(function(achievement) { %>
+                <div class="achievement-item">
+                    <div class="achievement-icon">🏆</div>
+                    <div class="achievement-details">
+                        <h4><%= achievement.description %></h4>
+                        <p><%= new Date(achievement.date).toLocaleDateString() %></p>
+                    </div>
+                </div>
+                <% }); %>
+            </div>
+        </div>
+        <% } %>
+    </div>
+
+    <script>
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate XP bar
+            const xpBar = document.querySelector('.xp-progress');
+            if (xpBar) {
+                setTimeout(() => {
+                    xpBar.style.transition = 'width 1s ease-in-out';
+                }, 500);
+            }
+            
+            // Add hover effects to level items
+            const levelItems = document.querySelectorAll('.level-item');
+            levelItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    this.style.transform = 'scale(1.05)';
+                });
+                item.addEventListener('mouseleave', function() {
+                    this.style.transform = 'scale(1)';
+                });
+            });
+        });
+    </script>
+    <script src="/js/dropdown.js"></script>
+    <script src="/js/theme-switcher.js"></script>
+</body>
+</html>
